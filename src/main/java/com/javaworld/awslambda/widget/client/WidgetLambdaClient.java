@@ -18,7 +18,7 @@ public class WidgetLambdaClient {
         // Setup credentials
         Widget widget = new Widget("2",";lkj");
 
-        /*BasicAWSCredentials awsCreds = new BasicAWSCredentials("AKIARLAXGQRPIC3XGNZE", "aM93TiDT1Lxfl47u+9+3cJS/VMUFTJdkL3h/17i4");
+        /*BasicAWSCredentials awsCreds = new BasicAWSCredentials("provide ur key", "provide ur key");
 
         // Create an AWSLambda client
         AWSLambda lambda = AWSLambdaClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(awsCreds)).withRegion(Regions.US_WEST_2).build();
