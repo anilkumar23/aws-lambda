@@ -4,42 +4,42 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTableMapper;
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.javaworld.awslambda.widget.model.Widget;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.javaworld.awslambda.widget.model.SmartTrack;
 
-public class CreateWidgetHandler implements RequestHandler<Widget, Widget>  {
+public class DataCreationHandler implements RequestHandler<SmartTrack, SmartTrack>  {
 
     @Override
-    public Widget handleRequest(Widget widget, Context context) {
-        String DYNAMODB_TABLE_NAME = "widget";
-        Regions REGION = Regions.US_WEST_2;
+    public SmartTrack handleRequest(SmartTrack smartTrack, Context context) {
+        Regions REGION = Regions.US_EAST_1;
         AmazonDynamoDB dynamoDBClient = new AmazonDynamoDBClient();
         dynamoDBClient.setRegion(Region.getRegion(REGION));
         DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
         //---------create table if not exists----
-        DynamoDBTableMapper<Widget,Long,?> table = mapper.newTableMapper(Widget.class);
-        table.createTableIfNotExists(new ProvisionedThroughput(25L, 25L));
+        DynamoDBTableMapper<SmartTrack,String,?> table = mapper.newTableMapper(SmartTrack.class);
 
-        if(widget != null) {
+        table.createTableIfNotExists(new ProvisionedThroughput(25L, 25L));
+        JsonParser parser = new JsonParser();
+        JsonObject jsonObject =parser.parse(smartTrack.toString()).getAsJsonObject();
+        System.out.println(jsonObject);
+        if(smartTrack != null) {
             try {
-                table.saveIfNotExists(widget);
+                table.saveIfNotExists(smartTrack);
             } catch (ConditionalCheckFailedException e) {
-                // handle already existing
                 System.out.println(e);
             }
         }
         else {
-            context.getLogger().log("widget has null values");
+            context.getLogger().log("Pi_Values has null values");
         }
-
-        return widget;
+        return smartTrack;
     }
 
 }

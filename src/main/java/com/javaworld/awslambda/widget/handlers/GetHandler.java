@@ -5,12 +5,11 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.javaworld.awslambda.widget.model.Widget;
-import com.javaworld.awslambda.widget.model.WidgetRequest;
+import com.javaworld.awslambda.widget.model.SmartTrack;
 
-public class GetWidgetHandler implements RequestHandler<WidgetRequest, Widget> {
+public class GetHandler implements RequestHandler<SmartTrack, SmartTrack> {
     @Override
-    public Widget handleRequest(WidgetRequest widgetRequest, Context context) {
+    public SmartTrack handleRequest(SmartTrack smartTrack, Context context) {
         // Create a connection to DynamoDB
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
 
@@ -43,15 +42,15 @@ public class GetWidgetHandler implements RequestHandler<WidgetRequest, Widget> {
         // Build a mapper
         DynamoDBMapper mapper = new DynamoDBMapper(client);
         // Load the widget by ID
-        Widget widget = mapper.load(Widget.class, widgetRequest.getId());
-        if(widget == null) {
+        smartTrack = mapper.load(SmartTrack.class, smartTrack.getDeviceId());
+        if(smartTrack == null) {
             // We did not find a widget with this ID, so return an empty Widget
-            context.getLogger().log("No Widget found with ID: " + widgetRequest.getId() + "\n");
-            return new Widget();
+            context.getLogger().log("No Widget found with ID: " + smartTrack.getDeviceId() + "\n");
+            return new SmartTrack();
         }
 
         // Return the widget
-        context.getLogger().log("widget details ==================>" +widget);
-        return widget;
+        context.getLogger().log("widget details ==================>" +smartTrack);
+        return smartTrack;
     }
 }
