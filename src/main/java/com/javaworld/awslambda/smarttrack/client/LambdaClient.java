@@ -1,4 +1,4 @@
-package com.javaworld.awslambda.widget.client;
+package com.javaworld.awslambda.smarttrack.client;
 
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
@@ -7,9 +7,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTableMapper;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.javaworld.awslambda.widget.model.SmartTrack;
+import com.javaworld.awslambda.smarttrack.model.SmartTrack;
 
 @SuppressWarnings("deprecation")
 public class LambdaClient {
@@ -26,9 +24,6 @@ public class LambdaClient {
         table.createTableIfNotExists(new ProvisionedThroughput(25L, 25L));
 
         try {
-            JsonParser parser = new JsonParser();
-            JsonObject jsonObject =parser.parse(smartTrack.toString()).getAsJsonObject();
-            System.out.println(jsonObject);
             mapper.save(smartTrack);
         } catch (Exception e) {
             e.printStackTrace();

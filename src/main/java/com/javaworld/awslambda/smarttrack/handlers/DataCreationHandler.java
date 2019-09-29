@@ -1,4 +1,4 @@
-package com.javaworld.awslambda.widget.handlers;
+package com.javaworld.awslambda.smarttrack.handlers;
 
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
@@ -10,9 +10,9 @@ import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.javaworld.awslambda.widget.model.SmartTrack;
+import com.javaworld.awslambda.smarttrack.model.SmartTrack;
+
+import java.util.List;
 
 public class DataCreationHandler implements RequestHandler<SmartTrack, SmartTrack>  {
 
@@ -26,9 +26,6 @@ public class DataCreationHandler implements RequestHandler<SmartTrack, SmartTrac
         DynamoDBTableMapper<SmartTrack,String,?> table = mapper.newTableMapper(SmartTrack.class);
 
         table.createTableIfNotExists(new ProvisionedThroughput(25L, 25L));
-        JsonParser parser = new JsonParser();
-        JsonObject jsonObject =parser.parse(smartTrack.toString()).getAsJsonObject();
-        System.out.println(jsonObject);
         if(smartTrack != null) {
             try {
                 table.saveIfNotExists(smartTrack);
