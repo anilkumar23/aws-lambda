@@ -11,6 +11,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.*;
+import com.javaworld.awslambda.smarttrack.handlers.DataCreationHandler;
 import com.javaworld.awslambda.smarttrack.model.SmartTrack;
 import com.javaworld.awslambda.smarttrack.model.SmartTrackRequest;
 import com.javaworld.awslambda.smarttrack.serviceImpl.SmartTrackImpl;
@@ -32,10 +33,13 @@ public class MPIResourceAPI {
     @Autowired
     SmartTrackImpl smartTrackImpl;
 
+
+    DataCreationHandler dataCreationHandler = new DataCreationHandler();
+
     @RequestMapping(value = "/send", method = RequestMethod.POST, headers = "Accept=application/json")
-    public HttpStatus insertData (@RequestBody SmartTrack smartTrack){
+    public void insertData (@RequestBody SmartTrack smartTrack){
+        dataCreationHandler.handleRequest(smartTrack,null);
         boolean isDataInserted = smartTrackImpl.handleRequest(smartTrack);
-        return isDataInserted ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
     }
 
     @RequestMapping(value = "/get", method = RequestMethod.POST, headers = "Accept=application/json")

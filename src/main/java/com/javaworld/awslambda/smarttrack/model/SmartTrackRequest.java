@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 /**
  * Created by anil.saladi on 9/29/2019.
  */
-//@DynamoDBTable(tableName = "smart_track_request")
+@DynamoDBTable(tableName = "smart_track_request")
 public class SmartTrackRequest {
 
     private String deviceId;
@@ -18,6 +18,7 @@ public class SmartTrackRequest {
     public SmartTrackRequest() {
     }
 
+    @DynamoDBAttribute(attributeName = "deviceId")
     public String getDeviceId() {
         return deviceId;
     }
@@ -25,7 +26,7 @@ public class SmartTrackRequest {
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
-
+    @DynamoDBAttribute(attributeName = "timestamp")
     public String getTimestamp() {
         return timestamp;
     }

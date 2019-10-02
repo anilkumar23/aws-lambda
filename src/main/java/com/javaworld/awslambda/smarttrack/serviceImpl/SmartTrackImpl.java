@@ -1,5 +1,8 @@
 package com.javaworld.awslambda.smarttrack.serviceImpl;
 
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.auth.AWSSessionCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -32,31 +35,27 @@ public class SmartTrackImpl {
         Regions REGION = Regions.US_EAST_1;
         AmazonDynamoDB dynamoDBClient = new AmazonDynamoDBClient();
         dynamoDBClient.setRegion(Region.getRegion(REGION));
+        BasicAWSCredentials awscreds = new BasicAWSCredentials("AKIAT5KM23BCFARSHF7Q",
+                "ou5vtTIzRD2WPFD2hMzYsf1Sbite4dWE3FPGEJxK");
+
         DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
         //---------create table if not exists----
         DynamoDBTableMapper<SmartTrack,String,?> table = mapper.newTableMapper(SmartTrack.class);
 
         table.createTableIfNotExists(new ProvisionedThroughput(25L, 25L));
-
-        DynamoDBTableMapper<SmartTrackRequest,String,?> table1 = mapper.newTableMapper(SmartTrackRequest.class);
-
-       table1.createTableIfNotExists(new ProvisionedThroughput(25L, 25L));
-        boolean isInserted = false;
-        SmartTrackRequest smartTrackRequest = new SmartTrackRequest();
+        boolean isDataInserted =false;
         if(smartTrack != null) {
             try {
-               table.saveIfNotExists(smartTrack);
-               smartTrackRequest.setDeviceId(smartTrack.getDeviceId());
-               isInserted = true;
+                table.saveIfNotExists(smartTrack);
+                isDataInserted=true;
             } catch (ConditionalCheckFailedException e) {
                 System.out.println(e);
-                isInserted = false;
             }
         }
         else {
-            System.out.println("Pi_Values has null values");
+            System.out.println("data values are null ====== >");
         }
-        return isInserted;
+        return isDataInserted;
     }
 
     public List<SmartTrack> handleRequest(SmartTrackRequest smartTrackRequest, Context context){

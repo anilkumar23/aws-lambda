@@ -18,6 +18,12 @@ public class DataCreationHandler implements RequestHandler<SmartTrack, SmartTrac
 
     @Override
     public SmartTrack handleRequest(SmartTrack smartTrack, Context context) {
+
+
+
+
+
+
         Regions REGION = Regions.US_EAST_1;
         AmazonDynamoDB dynamoDBClient = new AmazonDynamoDBClient();
         dynamoDBClient.setRegion(Region.getRegion(REGION));

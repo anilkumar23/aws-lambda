@@ -104,7 +104,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.javaworld.awslambda.smarttrack.client.WidgetLambdaClient</mainClass>
+                            <mainClass>com.javaworld.awslambda.smarttrack.SmartTrackApplication</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
