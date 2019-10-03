@@ -35,8 +35,8 @@ public class SmartTrackImpl {
         Regions REGION = Regions.US_EAST_1;
         AmazonDynamoDB dynamoDBClient = new AmazonDynamoDBClient();
         dynamoDBClient.setRegion(Region.getRegion(REGION));
-        BasicAWSCredentials awscreds = new BasicAWSCredentials("AKIAT5KM23BCFARSHF7Q",
-                "ou5vtTIzRD2WPFD2hMzYsf1Sbite4dWE3FPGEJxK");
+        BasicAWSCredentials awscreds = new BasicAWSCredentials("access_key",
+                "secret_key");
 
         DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
         //---------create table if not exists----
