@@ -1,8 +1,5 @@
 package com.javaworld.awslambda.smarttrack.serviceImpl;
 
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSSessionCredentials;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -10,55 +7,56 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTableMapper;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
-import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javaworld.awslambda.smarttrack.model.SmartTrack;
 import com.javaworld.awslambda.smarttrack.model.SmartTrackRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
-import com.amazonaws.services.lambda.runtime.Context;
 
 import java.util.*;
 
 /**
  * Created by anil.saladi on 9/28/2019.
  */
+@SuppressWarnings("deprecation")
 @Service
 public class SmartTrackImpl {
-  //  private static final Logger logger = LogManager.getLogger(SmartTrackImpl.class.getName());
+    private static final Logger logger = LogManager.getLogger(SmartTrackImpl.class.getName());
 
-    public boolean handleRequest(SmartTrack smartTrack) {
-        Regions REGION = Regions.US_EAST_1;
-        AmazonDynamoDB dynamoDBClient = new AmazonDynamoDBClient();
-        dynamoDBClient.setRegion(Region.getRegion(REGION));
-        BasicAWSCredentials awscreds = new BasicAWSCredentials("access_key",
-                "secret_key");
-
-        DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
-        //---------create table if not exists----
-        DynamoDBTableMapper<SmartTrack,String,?> table = mapper.newTableMapper(SmartTrack.class);
-
-        table.createTableIfNotExists(new ProvisionedThroughput(25L, 25L));
+    public boolean insertData(SmartTrack smartTrack) {
+        DynamoDBMapper mapper=null;
+        try {
+            logger.info("Connection to the DB started...");
+            Regions REGION = Regions.US_EAST_1;
+            AmazonDynamoDB dynamoDBClient = new AmazonDynamoDBClient();
+            dynamoDBClient.setRegion(Region.getRegion(REGION));
+            mapper = new DynamoDBMapper(dynamoDBClient);
+            logger.info("Connection successfully established...");
+        }catch (Exception ex){
+            logger.error("DBConnection failed due to "+ex.getMessage());
+        }
         boolean isDataInserted =false;
         if(smartTrack != null) {
             try {
-                table.saveIfNotExists(smartTrack);
+                mapper.save(smartTrack);
+                logger.info("Successfully inserted the data into DB...");
                 isDataInserted=true;
-            } catch (ConditionalCheckFailedException e) {
-                System.out.println(e);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                logger.error("Error occur while inserting data..." + ex.getMessage());
             }
         }
         else {
-            System.out.println("data values are null ====== >");
+            logger.info("Request Body has some null values...");
         }
         return isDataInserted;
     }
 
-    public List<SmartTrack> handleRequest(SmartTrackRequest smartTrackRequest, Context context){
+    public List<SmartTrack> getData(SmartTrackRequest smartTrackRequest){
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
         DynamoDBMapper mapper = new DynamoDBMapper(client);
 
@@ -100,3 +98,10 @@ public class SmartTrackImpl {
     }
 
 }
+
+//Inserting data with table ------------
+/*
+* DynamoDBTableMapper<SmartTrack,String,?> table = mapper.newTableMapper(SmartTrack.class);
+table.createTableIfNotExists(new ProvisionedThroughput(25L, 25L));
+table.saveIfNotExists(smartTrack);
+* */
