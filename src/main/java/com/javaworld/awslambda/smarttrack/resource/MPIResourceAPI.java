@@ -1,26 +1,17 @@
 package com.javaworld.awslambda.smarttrack.resource;
 
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.document.*;
-import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
-import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
-import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
-import com.amazonaws.services.dynamodbv2.model.*;
-import com.javaworld.awslambda.smarttrack.handlers.DataCreationHandler;
 import com.javaworld.awslambda.smarttrack.model.SmartTrack;
 import com.javaworld.awslambda.smarttrack.model.SmartTrackRequest;
 import com.javaworld.awslambda.smarttrack.serviceImpl.SmartTrackImpl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -29,21 +20,28 @@ import java.util.List;
 @RestController
 @RequestMapping("/message")
 public class MPIResourceAPI {
+    private final Logger logger = LogManager.getLogger(MPIResourceAPI.class.getName());
 
     @Autowired
     SmartTrackImpl smartTrackImpl;
 
-
-    DataCreationHandler dataCreationHandler = new DataCreationHandler();
-
     @RequestMapping(value = "/send", method = RequestMethod.POST, headers = "Accept=application/json")
-    public void insertData (@RequestBody SmartTrack smartTrack){
-        dataCreationHandler.handleRequest(smartTrack,null);
-        boolean isDataInserted = smartTrackImpl.handleRequest(smartTrack);
+    public HttpStatus insertData(@RequestBody SmartTrack smartTrack) {
+        logger.info("Entered insertData method to dump data into DB with the following data..." + smartTrack.toString());
+        boolean isDataInserted = smartTrackImpl.insertData(smartTrack);
+        return isDataInserted ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
     }
 
     @RequestMapping(value = "/get", method = RequestMethod.POST, headers = "Accept=application/json")
-    public List<SmartTrack> getData (@RequestBody SmartTrackRequest smartTrackRequest){
-        return smartTrackImpl.handleRequest(smartTrackRequest,null);
+    public List<SmartTrack> getData(@RequestBody SmartTrackRequest smartTrackRequest) {
+        logger.info("Entered getData method for retrieving the requested data..." + smartTrackRequest.toString());
+        try {
+            List<SmartTrack> smartTrackList = smartTrackImpl.getData(smartTrackRequest);
+            logger.info("Successfully fetched the requested data...");
+            return smartTrackList;
+        } catch (Exception ex) {
+            logger.error("Error occur while fetching smart-track details..." + ex.getMessage());
+            return null;
+        }
     }
 }

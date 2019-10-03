@@ -11,36 +11,38 @@ import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.javaworld.awslambda.smarttrack.model.SmartTrack;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
 public class DataCreationHandler implements RequestHandler<SmartTrack, SmartTrack>  {
-
+    private final Logger logger = LogManager.getLogger(DataCreationHandler.class.getName());
     @Override
     public SmartTrack handleRequest(SmartTrack smartTrack, Context context) {
-
-
-
-
-
-
-        Regions REGION = Regions.US_EAST_1;
-        AmazonDynamoDB dynamoDBClient = new AmazonDynamoDBClient();
-        dynamoDBClient.setRegion(Region.getRegion(REGION));
-        DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
-        //---------create table if not exists----
-        DynamoDBTableMapper<SmartTrack,String,?> table = mapper.newTableMapper(SmartTrack.class);
-
-        table.createTableIfNotExists(new ProvisionedThroughput(25L, 25L));
+        DynamoDBTableMapper<SmartTrack,String,?> table = null;
+        try {
+            logger.info("Connection to the DB started...");
+            Regions REGION = Regions.US_EAST_1;
+            AmazonDynamoDB dynamoDBClient = new AmazonDynamoDBClient();
+            dynamoDBClient.setRegion(Region.getRegion(REGION));
+            DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
+            table = mapper.newTableMapper(SmartTrack.class);
+            logger.info("Connection successfully established...");
+        }catch (Exception ex){
+            logger.error("DBConnection failed due to "+ex.getMessage());
+        }
         if(smartTrack != null) {
             try {
                 table.saveIfNotExists(smartTrack);
-            } catch (ConditionalCheckFailedException e) {
-                System.out.println(e);
+                logger.info("Successfully inserted the data into DB...");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                logger.error("Error occur while inserting data..." + ex.getMessage());
             }
         }
         else {
-            context.getLogger().log("Pi_Values has null values");
+            logger.info("Request Body has some null values...");
         }
         return smartTrack;
     }
