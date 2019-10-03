@@ -13,28 +13,6 @@ public class SmartTrackApplication {
     private static final Logger logger = LogManager.getLogger(SmartTrackApplication.class.getName());
 
     public static void main(String[] args) {
-        logger.info("SmartTrackApplication started .................");
-        logger.debug("jdbjbvdjfk");
-        logger.debug("jdbjbvdjfk");
-        logger.debug("jdbjbvdjfk");
-        logger.debug("jdbjbvdjfk");
-        logger.debug("jdbjbvdjfk");logger.debug("jdbjbvdjfk");
-        logger.debug("jdbjbvdjfk");
-        logger.fatal("kjdnvkjdsn");
-        logger.fatal("kjdnvkjdsn");
-        logger.fatal("kjdnvkjdsn");logger.fatal("kjdnvkjdsn");logger.fatal("kjdnvkjdsn");logger.fatal("kjdnvkjdsn");
-        logger.error("sjdnvckjdjcn");
-        logger.error("skjdbcnkjsd");
-        logger.error("sjdnvckjdjcn");
-        logger.error("skjdbcnkjsd");
-        logger.error("sjdnvckjdjcn");
-        logger.error("skjdbcnkjsd");
-        logger.error("sjdnvckjdjcn");
-        logger.error("skjdbcnkjsd");
-        logger.error("sjdnvckjdjcn");
-        logger.error("skjdbcnkjsd");
-        logger.error("sjdnvckjdjcn");
-        logger.error("skjdbcnkjsd");
         SpringApplication.run(SmartTrackApplication.class, args);
     }
 }
