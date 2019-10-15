@@ -4,20 +4,13 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.javaworld.awslambda.smarttrack.model.SmartTrack;
-import com.javaworld.awslambda.smarttrack.model.SmartTrackRequest;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTableMapper;
+import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
+import com.javaworld.awslambda.smarttrack.model.TTDPowerSupply;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 /**
  * Created by anil.saladi on 9/28/2019.
@@ -27,22 +20,23 @@ import java.util.*;
 public class SmartTrackImpl {
     private static final Logger logger = LogManager.getLogger(SmartTrackImpl.class.getName());
 
-    public boolean insertData(SmartTrack smartTrack) {
-        DynamoDBMapper mapper=null;
+    public boolean insertData(TTDPowerSupply power) {
+        Regions REGION = Regions.US_EAST_1;
+        AmazonDynamoDB dynamoDBClient = new AmazonDynamoDBClient();
+        dynamoDBClient.setRegion(Region.getRegion(REGION));
+        DynamoDBMapper mapper=new DynamoDBMapper(dynamoDBClient);
         try {
+            DynamoDBTableMapper<TTDPowerSupply,String,?> table = mapper.newTableMapper(TTDPowerSupply.class);
+            table.createTableIfNotExists(new ProvisionedThroughput(25L, 25L));
             logger.info("Connection to the DB started...");
-            Regions REGION = Regions.US_EAST_1;
-            AmazonDynamoDB dynamoDBClient = new AmazonDynamoDBClient();
-            dynamoDBClient.setRegion(Region.getRegion(REGION));
-            mapper = new DynamoDBMapper(dynamoDBClient);
             logger.info("Connection successfully established...");
         }catch (Exception ex){
             logger.error("DBConnection failed due to "+ex.getMessage());
         }
         boolean isDataInserted =false;
-        if(smartTrack != null) {
+        if(power != null) {
             try {
-                mapper.save(smartTrack);
+                mapper.save(power);
                 logger.info("Successfully inserted the data into DB...");
                 isDataInserted=true;
             } catch (Exception ex) {
@@ -56,7 +50,7 @@ public class SmartTrackImpl {
         return isDataInserted;
     }
 
-    public List<SmartTrack> getData(SmartTrackRequest smartTrackRequest){
+   /* public List<SmartTrack> getData(SmartTrackRequest smartTrackRequest){
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
         DynamoDBMapper mapper = new DynamoDBMapper(client);
 
@@ -96,7 +90,7 @@ public class SmartTrackImpl {
         }
         return getList;
     }
-
+*/
 }
 
 //Inserting data with table ------------

@@ -10,27 +10,27 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.javaworld.awslambda.smarttrack.model.SmartTrack;
 import com.javaworld.awslambda.smarttrack.model.SmartTrackRequest;
+import com.javaworld.awslambda.smarttrack.model.TTDPowerSupply;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GetHandler implements RequestHandler<SmartTrackRequest, List<SmartTrack>> {
+public class GetHandler implements RequestHandler<SmartTrackRequest, List<TTDPowerSupply>> {
     @Override
-    public List<SmartTrack> handleRequest(SmartTrackRequest smartTrackRequest, Context context) {
+    public List<TTDPowerSupply> handleRequest(SmartTrackRequest smartTrackRequest, Context context) {
 
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
         DynamoDBMapper mapper = new DynamoDBMapper(client);
 
-        List<SmartTrack> smartTrackList = new ArrayList<>();
+        List<TTDPowerSupply> ttdPowerSupplies = new ArrayList<>();
         try {
-            smartTrackList = getDataOfSpecificDeviceId(mapper, smartTrackRequest);
-            if (smartTrackList!=null){
-                return smartTrackList;
-            }else {
+            ttdPowerSupplies = getDataOfSpecificDeviceId(mapper, smartTrackRequest);
+            if (ttdPowerSupplies != null) {
+                return ttdPowerSupplies;
+            } else {
                 return null;
             }
         } catch (Exception e) {
@@ -38,7 +38,8 @@ public class GetHandler implements RequestHandler<SmartTrackRequest, List<SmartT
             return null;
         }
     }
-    private List<SmartTrack> getDataOfSpecificDeviceId (DynamoDBMapper mapper, SmartTrackRequest smartTrackRequest) throws Exception {
+
+    private List<TTDPowerSupply> getDataOfSpecificDeviceId(DynamoDBMapper mapper, SmartTrackRequest smartTrackRequest) throws Exception {
 
         Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
         eav.put(":val1", new AttributeValue().withS(smartTrackRequest.getDeviceId()));
@@ -46,15 +47,15 @@ public class GetHandler implements RequestHandler<SmartTrackRequest, List<SmartT
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
                 .withFilterExpression("deviceId = :val1").withExpressionAttributeValues(eav);
 
-        List<SmartTrack> smartTracks = mapper.scan(SmartTrack.class, scanExpression);
-        List<SmartTrack> getList = new ArrayList<>();
-        for (SmartTrack smartTrack : smartTracks) {
+        List<TTDPowerSupply> ttdPowerSupplies = mapper.scan(TTDPowerSupply.class, scanExpression);
+        List<TTDPowerSupply> getList = new ArrayList<>();
+        for (TTDPowerSupply ttdPowerSupply : ttdPowerSupplies) {
             JsonParser jsonParser = new JsonParser();
-            JsonObject objectFromString = jsonParser.parse(smartTrack.toString()).getAsJsonObject();
+            JsonObject objectFromString = jsonParser.parse(ttdPowerSupply.toString()).getAsJsonObject();
             Gson gson = new Gson();
-            smartTrack = gson.fromJson(objectFromString, SmartTrack.class);
-            if (smartTrack.getTimestamp().contains(smartTrackRequest.getTimestamp())) {
-                getList.add(smartTrack);
+            ttdPowerSupply = gson.fromJson(objectFromString, TTDPowerSupply.class);
+            if (ttdPowerSupply.getTimestamp().contains(smartTrackRequest.getTimestamp())) {
+                getList.add(ttdPowerSupply);
             }
         }
         return getList;

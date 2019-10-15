@@ -1,7 +1,7 @@
 package com.javaworld.awslambda.smarttrack.resource;
 
-import com.javaworld.awslambda.smarttrack.model.SmartTrack;
 import com.javaworld.awslambda.smarttrack.model.SmartTrackRequest;
+import com.javaworld.awslambda.smarttrack.model.TTDPowerSupply;
 import com.javaworld.awslambda.smarttrack.serviceImpl.SmartTrackImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,22 +26,22 @@ public class MPIResourceAPI {
     SmartTrackImpl smartTrackImpl;
 
     @RequestMapping(value = "/send", method = RequestMethod.POST, headers = "Accept=application/json")
-    public HttpStatus insertData(@RequestBody SmartTrack smartTrack) {
-        logger.info("Entered insertData method to dump data into DB with the following data..." + smartTrack.toString());
-        boolean isDataInserted = smartTrackImpl.insertData(smartTrack);
+    public HttpStatus insertData(@RequestBody TTDPowerSupply ttdPowerSupply) {
+        logger.info("Entered insertData method to dump data into DB with the following data..." + ttdPowerSupply.toString());
+        boolean isDataInserted = smartTrackImpl.insertData(ttdPowerSupply);
         return isDataInserted ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
     }
 
-    @RequestMapping(value = "/get", method = RequestMethod.POST, headers = "Accept=application/json")
-    public List<SmartTrack> getData(@RequestBody SmartTrackRequest smartTrackRequest) {
+    /*@RequestMapping(value = "/get", method = RequestMethod.POST, headers = "Accept=application/json")
+    public List<TTDPowerSupply> getData(@RequestBody SmartTrackRequest smartTrackRequest) {
         logger.info("Entered getData method for retrieving the requested data..." + smartTrackRequest.toString());
         try {
-            List<SmartTrack> smartTrackList = smartTrackImpl.getData(smartTrackRequest);
+            List<TTDPowerSupply> smartTrackList = smartTrackImpl.getData(smartTrackRequest);
             logger.info("Successfully fetched the requested data...");
             return smartTrackList;
         } catch (Exception ex) {
             logger.error("Error occur while fetching smart-track details..." + ex.getMessage());
             return null;
         }
-    }
+    }*/
 }

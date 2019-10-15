@@ -1,3 +1,4 @@
+/*
 package com.javaworld.awslambda.smarttrack.client;
 
 import com.amazonaws.regions.Region;
@@ -30,3 +31,4 @@ public class LambdaClient {
         }
     }
 }
+*/
