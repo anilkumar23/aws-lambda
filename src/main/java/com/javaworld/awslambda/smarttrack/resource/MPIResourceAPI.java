@@ -32,16 +32,16 @@ public class MPIResourceAPI {
         return isDataInserted ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
     }
 
-    /*@RequestMapping(value = "/get", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/get", method = RequestMethod.POST, headers = "Accept=application/json")
     public List<TTDPowerSupply> getData(@RequestBody SmartTrackRequest smartTrackRequest) {
         logger.info("Entered getData method for retrieving the requested data..." + smartTrackRequest.toString());
         try {
-            List<TTDPowerSupply> smartTrackList = smartTrackImpl.getData(smartTrackRequest);
+            List<TTDPowerSupply> ttdPowerSupplyList = smartTrackImpl.getData(smartTrackRequest);
             logger.info("Successfully fetched the requested data...");
-            return smartTrackList;
+            return ttdPowerSupplyList;
         } catch (Exception ex) {
-            logger.error("Error occur while fetching smart-track details..." + ex.getMessage());
+            logger.error("Error occur while fetching TTDPowerSupply details..." + ex);
             return null;
         }
-    }*/
+    }
 }

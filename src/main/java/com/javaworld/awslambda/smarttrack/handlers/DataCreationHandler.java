@@ -8,15 +8,18 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTableMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.javaworld.awslambda.smarttrack.exception.TTDCustomException;
 import com.javaworld.awslambda.smarttrack.model.TTDPowerSupply;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+@SuppressWarnings("deprecation")
 public class DataCreationHandler implements RequestHandler<TTDPowerSupply, TTDPowerSupply> {
     private final Logger logger = LogManager.getLogger(DataCreationHandler.class.getName());
+
     @Override
     public TTDPowerSupply handleRequest(TTDPowerSupply ttdPowerSupply, Context context) {
-        DynamoDBTableMapper<TTDPowerSupply,String,?> table = null;
+        DynamoDBTableMapper<TTDPowerSupply, String, ?> table = null;
         try {
             logger.info("Connection to the DB started...");
             context.getLogger().log("Connection to the DB started...");
@@ -27,22 +30,20 @@ public class DataCreationHandler implements RequestHandler<TTDPowerSupply, TTDPo
             table = mapper.newTableMapper(TTDPowerSupply.class);
             logger.info("Connection successfully established...");
             context.getLogger().log("Connection successfully established...");
-        }catch (Exception ex){
-            logger.error("DBConnection failed due to "+ex.getMessage());
-            context.getLogger().log("DBConnection failed due to "+ex.getMessage());
+        } catch (Exception ex) {
+            context.getLogger().log("DBConnection failed due to " + ex.getMessage());
+            throw new TTDCustomException("DBConnection failed due to " + ex.getMessage());
         }
-        if(ttdPowerSupply != null) {
+        if (ttdPowerSupply != null) {
             try {
                 table.saveIfNotExists(ttdPowerSupply);
                 logger.info("Successfully inserted the data into DB...");
                 context.getLogger().log("Successfully inserted the data into DB...");
             } catch (Exception ex) {
-                ex.printStackTrace();
-                logger.error("Error occur while inserting data..." + ex.getMessage());
                 context.getLogger().log("Error occur while inserting data..." + ex.getMessage());
+                throw new TTDCustomException("Error occur while inserting data..." + ex.getMessage());
             }
-        }
-        else {
+        } else {
             logger.info("Request Body has some null values...");
             context.getLogger().log("Request Body has some null values...");
         }

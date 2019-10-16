@@ -1,11 +1,7 @@
 package com.javaworld.awslambda.smarttrack.model;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.*;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 /**
  * Created by anil.saladi on 9/29/2019.
@@ -15,6 +11,7 @@ public class SmartTrackRequest {
 
     private String deviceId;
     private String timestamp;
+
     public SmartTrackRequest() {
     }
 
@@ -26,6 +23,7 @@ public class SmartTrackRequest {
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
+
     @DynamoDBAttribute(attributeName = "timestamp")
     public String getTimestamp() {
         return timestamp;

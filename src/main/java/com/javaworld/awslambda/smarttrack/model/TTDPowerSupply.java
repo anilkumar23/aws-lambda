@@ -6,6 +6,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 import java.io.Serializable;
+
 /**
  * Created by anil.saladi on 9/26/2019.
  */
@@ -43,6 +44,7 @@ public class TTDPowerSupply implements Serializable {
     public void setId(String id) {
         this.id = id;
     }
+
     @DynamoDBAttribute(attributeName = "deviceId")
     public String getDeviceId() {
         return deviceId;
@@ -51,6 +53,7 @@ public class TTDPowerSupply implements Serializable {
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
+
     @DynamoDBAttribute(attributeName = "deviceName")
     public String getDeviceName() {
         return deviceName;
@@ -59,6 +62,7 @@ public class TTDPowerSupply implements Serializable {
     public void setDeviceName(String deviceName) {
         this.deviceName = deviceName;
     }
+
     @DynamoDBAttribute(attributeName = "timestamp")
     public String getTimestamp() {
         return timestamp;
@@ -67,6 +71,7 @@ public class TTDPowerSupply implements Serializable {
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
+
     @DynamoDBAttribute(attributeName = "power")
     public String getPower() {
         return power;
@@ -75,6 +80,7 @@ public class TTDPowerSupply implements Serializable {
     public void setPower(String power) {
         this.power = power;
     }
+
     @DynamoDBAttribute(attributeName = "energy")
     public String getEnergy() {
         return energy;
@@ -83,6 +89,7 @@ public class TTDPowerSupply implements Serializable {
     public void setEnergy(String energy) {
         this.energy = energy;
     }
+
     @DynamoDBAttribute(attributeName = "ipAddress")
     public String getIpAddress() {
         return ipAddress;
@@ -95,6 +102,7 @@ public class TTDPowerSupply implements Serializable {
     @Override
     public String toString() {
         return "{" +
+                "id:'" + id + '\'' +
                 "deviceId:'" + deviceId + '\'' +
                 ", deviceName:'" + deviceName + '\'' +
                 ", timestamp:'" + timestamp + '\'' +
