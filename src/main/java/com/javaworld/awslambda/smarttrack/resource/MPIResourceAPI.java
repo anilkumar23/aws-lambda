@@ -7,10 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -37,6 +34,18 @@ public class MPIResourceAPI {
         logger.info("Entered getData method for retrieving the requested data..." + smartTrackRequest.toString());
         try {
             List<TTDPowerSupply> ttdPowerSupplyList = smartTrackImpl.getData(smartTrackRequest);
+            logger.info("Successfully fetched the requested data...");
+            return ttdPowerSupplyList;
+        } catch (Exception ex) {
+            logger.error("Error occur while fetching TTDPowerSupply details..." + ex);
+            return null;
+        }
+    }
+
+    @RequestMapping(value = "/getDeviceListByName/{deviceName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    public List<TTDPowerSupply> getDeviceDataBasedOnName(@PathVariable String deviceName) {
+        try {
+            List<TTDPowerSupply> ttdPowerSupplyList = smartTrackImpl.getDeviceDataWithName(deviceName);
             logger.info("Successfully fetched the requested data...");
             return ttdPowerSupplyList;
         } catch (Exception ex) {

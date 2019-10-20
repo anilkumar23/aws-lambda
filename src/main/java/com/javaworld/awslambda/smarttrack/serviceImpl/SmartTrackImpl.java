@@ -20,6 +20,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,13 +82,23 @@ public class SmartTrackImpl {
 
     }
 
+    public List<TTDPowerSupply> getDeviceDataWithName(String deviceName){
+        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
+        DynamoDBMapper mapper = new DynamoDBMapper(client);
+        Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
+        eav.put(":val1", new AttributeValue().withS(deviceName));
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
+                .withFilterExpression("deviceName = :val1").withExpressionAttributeValues(eav);
+        List<TTDPowerSupply> powerSupplyArrayList = mapper.scan(TTDPowerSupply.class, scanExpression);
+        return powerSupplyArrayList;
+    }
+
     private List<TTDPowerSupply> getDataOfSpecificDeviceId(DynamoDBMapper mapper, SmartTrackRequest smartTrackRequest) throws Exception {
         Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
         eav.put(":val1", new AttributeValue().withS(smartTrackRequest.getDeviceId()));
 
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
                 .withFilterExpression("deviceId = :val1").withExpressionAttributeValues(eav);
-
         List<TTDPowerSupply> ttdPowerSupplyList = mapper.scan(TTDPowerSupply.class, scanExpression);
         List<TTDPowerSupply> getTtdPowerSupplyList = new ArrayList<>();
         for (TTDPowerSupply ttdPowerSupply : ttdPowerSupplyList) {
