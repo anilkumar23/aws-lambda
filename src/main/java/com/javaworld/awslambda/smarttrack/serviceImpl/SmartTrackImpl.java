@@ -146,27 +146,31 @@ public class SmartTrackImpl {
         List<TTDPowerSupply> ttdPowerSupplyList = mapper.scan(TTDPowerSupply.class, scanExpression);
         List<TTDPowerSupply> getTtdPowerSupplyList = new ArrayList<>();
         List<Voltage> voltageList = new ArrayList<>();
+        int count = 10;
         for (TTDPowerSupply ttdPowerSupply : ttdPowerSupplyList) {
-            Gson gson = new Gson();
-            ttdPowerSupply.setPower(ttdPowerSupply.getPower().replaceAll("'", ""));
-            ttdPowerSupply.setEnergy(ttdPowerSupply.getEnergy().replaceAll("'", ""));
-            JsonParser jsonParser = new JsonParser();
+            if (count!=0) {
+                Gson gson = new Gson();
+                ttdPowerSupply.setPower(ttdPowerSupply.getPower().replaceAll("'", ""));
+                ttdPowerSupply.setEnergy(ttdPowerSupply.getEnergy().replaceAll("'", ""));
+                JsonParser jsonParser = new JsonParser();
 
-            JsonObject objectFromString = jsonParser.parse(ttdPowerSupply.toString()).getAsJsonObject();
+                JsonObject objectFromString = jsonParser.parse(ttdPowerSupply.toString()).getAsJsonObject();
 
-            ttdPowerSupply = gson.fromJson(objectFromString, TTDPowerSupply.class);
-            if (ttdPowerSupply.getTimestamp().contains(smartTrackRequest.getTimestamp())) {
-                getTtdPowerSupplyList.add(ttdPowerSupply);
-                String rphvol = null;
-                if (ttdPowerSupply.getPower() != null && ttdPowerSupply.getPower().contains("rphvol")){
-                    String [] s = ttdPowerSupply.getPower().split(",");
-                    rphvol = s[1];
-                    //rphvol =  ttdPowerSupply.getPower();
+                ttdPowerSupply = gson.fromJson(objectFromString, TTDPowerSupply.class);
+                if (ttdPowerSupply.getTimestamp().contains(smartTrackRequest.getTimestamp())) {
+                    getTtdPowerSupplyList.add(ttdPowerSupply);
+                    String rphvol = null;
+                    if (ttdPowerSupply.getPower() != null && ttdPowerSupply.getPower().contains("rphvol")) {
+                        String[] s = ttdPowerSupply.getPower().split(",");
+                        rphvol = s[1];
+                        count--;
+                    }
+                    Voltage voltage = new Voltage(rphvol, ttdPowerSupply.getTimestamp());
+                    voltageList.add(voltage);
                 }
-                Voltage voltage = new Voltage(rphvol,ttdPowerSupply.getTimestamp());
-                voltageList.add(voltage);
+            }else {
+                break;
             }
-
         }
 
         return voltageList;
