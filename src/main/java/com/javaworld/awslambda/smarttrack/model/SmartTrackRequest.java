@@ -15,6 +15,11 @@ public class SmartTrackRequest {
     public SmartTrackRequest() {
     }
 
+    public SmartTrackRequest(String deviceId, String timestamp) {
+        this.deviceId = deviceId;
+        this.timestamp = timestamp;
+    }
+
     @DynamoDBAttribute(attributeName = "deviceId")
     public String getDeviceId() {
         return deviceId;

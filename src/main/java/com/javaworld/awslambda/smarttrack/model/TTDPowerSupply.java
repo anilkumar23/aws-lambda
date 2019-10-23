@@ -103,7 +103,7 @@ public class TTDPowerSupply implements Serializable {
     public String toString() {
         return "{" +
                 "id:'" + id + '\'' +
-                "deviceId:'" + deviceId + '\'' +
+                ", deviceId:'" + deviceId + '\'' +
                 ", deviceName:'" + deviceName + '\'' +
                 ", timestamp:'" + timestamp + '\'' +
                 ", ipAddress:'" + ipAddress + '\'' +

@@ -2,6 +2,7 @@ package com.javaworld.awslambda.smarttrack.resource;
 
 import com.javaworld.awslambda.smarttrack.model.SmartTrackRequest;
 import com.javaworld.awslambda.smarttrack.model.TTDPowerSupply;
+import com.javaworld.awslambda.smarttrack.model.Voltage;
 import com.javaworld.awslambda.smarttrack.serviceImpl.SmartTrackImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,6 +42,21 @@ public class MPIResourceAPI {
             return null;
         }
     }
+
+
+    @RequestMapping(value = "/getVoltage/{deviceID}/{timestamp}", method = RequestMethod.GET, headers = "Accept=application/json")
+    public List<Voltage> getVoltageData(@PathVariable String deviceID, @PathVariable String timestamp) {
+        logger.info("Entered getData method for retrieving the requested data...");
+        try {
+            List<Voltage> voltageList = smartTrackImpl.getVoltageData(deviceID, timestamp);
+            logger.info("Successfully fetched the requested data...");
+            return voltageList;
+        } catch (Exception ex) {
+            logger.error("Error occur while fetching TTDPowerSupply details..." + ex);
+            return null;
+        }
+    }
+
 
     @RequestMapping(value = "/getDeviceListByName/{deviceName}", method = RequestMethod.GET, headers = "Accept=application/json")
     public List<TTDPowerSupply> getDeviceDataBasedOnName(@PathVariable String deviceName) {
