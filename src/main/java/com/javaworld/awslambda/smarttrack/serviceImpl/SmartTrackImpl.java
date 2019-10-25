@@ -162,7 +162,7 @@ public class SmartTrackImpl {
                     String rphvol = null;
                     if (ttdPowerSupply.getPower() != null && ttdPowerSupply.getPower().contains("rphvol")) {
                         String[] s = ttdPowerSupply.getPower().split(",");
-                        rphvol = s[1];
+                        rphvol = s[1].replaceAll("rphvol:","");
                         count--;
                     }
                     Voltage voltage = new Voltage(rphvol, ttdPowerSupply.getTimestamp());
