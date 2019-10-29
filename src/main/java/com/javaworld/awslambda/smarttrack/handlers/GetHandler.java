@@ -1,3 +1,4 @@
+/*
 package com.javaworld.awslambda.smarttrack.handlers;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -39,7 +40,8 @@ public class GetHandler implements RequestHandler<SmartTrackRequest, List<TTDPow
         }
     }
 
-    private List<TTDPowerSupply> getDataOfSpecificDeviceId(DynamoDBMapper mapper, SmartTrackRequest smartTrackRequest) throws Exception {
+    */
+/*private List<TTDPowerSupply> getDataOfSpecificDeviceId(DynamoDBMapper mapper, SmartTrackRequest smartTrackRequest) throws Exception {
 
         Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
         eav.put(":val1", new AttributeValue().withS(smartTrackRequest.getDeviceId()));
@@ -58,10 +60,12 @@ public class GetHandler implements RequestHandler<SmartTrackRequest, List<TTDPow
             JsonObject objectFromString = jsonParser.parse(ttdPowerSupply.toString()).getAsJsonObject();
 
             ttdPowerSupply = gson.fromJson(objectFromString, TTDPowerSupply.class);
-            if (ttdPowerSupply.getTimestamp().contains(smartTrackRequest.getTimestamp())) {
+            if (ttdPowerSupply.gettStamp().contains(smartTrackRequest.getTimestamp())) {
                 getTTDPowerSupplyList.add(ttdPowerSupply);
             }
         }
         return getTTDPowerSupplyList;
-    }
+    }*//*
+
 }
+*/

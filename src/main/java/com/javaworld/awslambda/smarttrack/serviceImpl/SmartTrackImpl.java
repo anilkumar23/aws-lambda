@@ -14,19 +14,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javaworld.awslambda.smarttrack.exception.TTDCustomException;
-import com.javaworld.awslambda.smarttrack.model.SmartTrackRequest;
 import com.javaworld.awslambda.smarttrack.model.TTDPowerSupply;
 import com.javaworld.awslambda.smarttrack.model.Voltage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by anil.saladi on 9/28/2019.
@@ -65,7 +59,7 @@ public class SmartTrackImpl {
         return isDataInserted;
     }
 
-    public List<TTDPowerSupply> getData(SmartTrackRequest smartTrackRequest) {
+   /* public List<TTDPowerSupply> getData(SmartTrackRequest smartTrackRequest) {
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
         DynamoDBMapper mapper = new DynamoDBMapper(client);
 
@@ -81,16 +75,16 @@ public class SmartTrackImpl {
             throw new TTDCustomException(e.getMessage());
         }
 
-    }
+    }*/
 
-    public List<Voltage> getVoltageData(String deviceId, String timeStamp) {
+    public List<Voltage> getVoltageData(String tStamp) {
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
         DynamoDBMapper mapper = new DynamoDBMapper(client);
 
         List<Voltage> voltageList = new ArrayList<>();
-        SmartTrackRequest smartTrackRequest = new SmartTrackRequest(deviceId,timeStamp);
+        // SmartTrackRequest smartTrackRequest = new SmartTrackRequest(deviceId,timeStamp);
         try {
-            voltageList = getVoltageList(mapper, smartTrackRequest);
+            voltageList = getVoltageList(mapper, tStamp);
             if (voltageList != null) {
                 return voltageList;
             } else {
@@ -102,7 +96,7 @@ public class SmartTrackImpl {
 
     }
 
-    public List<TTDPowerSupply> getDeviceDataWithName(String deviceName){
+    public List<TTDPowerSupply> getDeviceDataWithName(String deviceName) {
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
         DynamoDBMapper mapper = new DynamoDBMapper(client);
         Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
@@ -113,7 +107,7 @@ public class SmartTrackImpl {
         return powerSupplyArrayList;
     }
 
-    private List<TTDPowerSupply> getDataOfSpecificDeviceId(DynamoDBMapper mapper, SmartTrackRequest smartTrackRequest) throws Exception {
+    /*private List<TTDPowerSupply> getDataOfSpecificDeviceId(DynamoDBMapper mapper, SmartTrackRequest smartTrackRequest) throws Exception {
         Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
         eav.put(":val1", new AttributeValue().withS(smartTrackRequest.getDeviceId()));
 
@@ -130,49 +124,70 @@ public class SmartTrackImpl {
             JsonObject objectFromString = jsonParser.parse(ttdPowerSupply.toString()).getAsJsonObject();
 
             ttdPowerSupply = gson.fromJson(objectFromString, TTDPowerSupply.class);
-            if (ttdPowerSupply.getTimestamp().contains(smartTrackRequest.getTimestamp())) {
+            if (ttdPowerSupply.gettStamp().contains(smartTrackRequest.getTimestamp())) {
                 getTtdPowerSupplyList.add(ttdPowerSupply);
             }
         }
         return getTtdPowerSupplyList;
-    }
+    }*/
 
-    private List<Voltage> getVoltageList(DynamoDBMapper mapper, SmartTrackRequest smartTrackRequest) throws Exception {
+    private List<Voltage> getVoltageList(DynamoDBMapper mapper, String timestamp) throws Exception {
         Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
-        eav.put(":val1", new AttributeValue().withS(smartTrackRequest.getDeviceId()));
-
+        eav.put(":tStamp", new AttributeValue().withS(timestamp));
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
-                .withFilterExpression("deviceId = :val1").withExpressionAttributeValues(eav);
+                .withFilterExpression("contains(tStamp, :tStamp)").withExpressionAttributeValues(eav);
         List<TTDPowerSupply> ttdPowerSupplyList = mapper.scan(TTDPowerSupply.class, scanExpression);
         List<TTDPowerSupply> getTtdPowerSupplyList = new ArrayList<>();
         List<Voltage> voltageList = new ArrayList<>();
-        int count = 10;
+        int count = 24;
+        int c = 0;
+        Map<String, String> map = new HashMap<>();
+        String rphvol = "";
         for (TTDPowerSupply ttdPowerSupply : ttdPowerSupplyList) {
-            if (count!=0) {
+            if (count != 0) {
                 Gson gson = new Gson();
                 ttdPowerSupply.setPower(ttdPowerSupply.getPower().replaceAll("'", ""));
                 ttdPowerSupply.setEnergy(ttdPowerSupply.getEnergy().replaceAll("'", ""));
                 JsonParser jsonParser = new JsonParser();
-
                 JsonObject objectFromString = jsonParser.parse(ttdPowerSupply.toString()).getAsJsonObject();
-
                 ttdPowerSupply = gson.fromJson(objectFromString, TTDPowerSupply.class);
-                if (ttdPowerSupply.getTimestamp().contains(smartTrackRequest.getTimestamp())) {
+
+                if (ttdPowerSupply.gettStamp().contains(timestamp)) {
                     getTtdPowerSupplyList.add(ttdPowerSupply);
-                    String rphvol = null;
+
                     if (ttdPowerSupply.getPower() != null && ttdPowerSupply.getPower().contains("rphvol")) {
                         String[] s = ttdPowerSupply.getPower().split(",");
-                        rphvol = s[1].replaceAll("rphvol:","");
+
+                        if (count == 24) {
+                            map.put(ttdPowerSupply.getDeviceId(), s[1].replaceAll("rphvol:", "").replace("V","").trim());
+                        } else {
+                            if (map.containsKey(ttdPowerSupply.getDeviceId())) {
+                                String s3 =  map.get(ttdPowerSupply.getDeviceId());
+                                map.put(ttdPowerSupply.getDeviceId(), s3.concat(", " + s[1].replaceAll("rphvol:", "").replace("V","").trim()));
+                            } else if (c == 0) {
+                                map.put(ttdPowerSupply.getDeviceId(), s[1].replaceAll("rphvol:", "").replace("V","").trim());
+                                c++;
+                            } else {
+                                String newVol = s[1].replaceAll("rphvol:", "").replace("V","").trim();
+                                map.put(ttdPowerSupply.getDeviceId(), newVol);
+                            }
+                        }
                         count--;
                     }
-                    Voltage voltage = new Voltage(rphvol, ttdPowerSupply.getTimestamp());
-                    voltageList.add(voltage);
                 }
-            }else {
+            } else {
                 break;
             }
         }
-
+        for (Map.Entry<String, String> s1 : map.entrySet()) {
+            String s4[] = s1.getValue().split(",");
+            List<Double> list = new ArrayList<>();
+            for (String d: s4) {
+                list.add(Double.parseDouble(d.trim()));
+            }
+            Voltage voltage = new Voltage(list, s1.getKey());
+            voltageList.add(voltage);
+        }
         return voltageList;
     }
 

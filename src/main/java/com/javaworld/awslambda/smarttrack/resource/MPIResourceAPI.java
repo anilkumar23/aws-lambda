@@ -30,7 +30,7 @@ public class MPIResourceAPI {
         return isDataInserted ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
     }
 
-    @RequestMapping(value = "/get", method = RequestMethod.POST, headers = "Accept=application/json")
+/*    @RequestMapping(value = "/get", method = RequestMethod.POST, headers = "Accept=application/json")
     public List<TTDPowerSupply> getData(@RequestBody SmartTrackRequest smartTrackRequest) {
         logger.info("Entered getData method for retrieving the requested data..." + smartTrackRequest.toString());
         try {
@@ -41,14 +41,14 @@ public class MPIResourceAPI {
             logger.error("Error occur while fetching TTDPowerSupply details..." + ex);
             return null;
         }
-    }
+    }*/
 
 
-    @RequestMapping(value = "/getVoltage/{deviceID}/{timestamp}", method = RequestMethod.GET, headers = "Accept=application/json")
-    public List<Voltage> getVoltageData(@PathVariable String deviceID, @PathVariable String timestamp) {
+    @RequestMapping(value = "/getVoltage/{timestamp}", method = RequestMethod.GET, headers = "Accept=application/json")
+    public List<Voltage> getVoltageData(@PathVariable String timestamp) {
         logger.info("Entered getData method for retrieving the requested data...");
         try {
-            List<Voltage> voltageList = smartTrackImpl.getVoltageData(deviceID, timestamp);
+            List<Voltage> voltageList = smartTrackImpl.getVoltageData(timestamp);
             logger.info("Successfully fetched the requested data...");
             return voltageList;
         } catch (Exception ex) {

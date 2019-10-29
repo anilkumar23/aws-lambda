@@ -10,23 +10,23 @@ import java.io.Serializable;
 /**
  * Created by anil.saladi on 9/26/2019.
  */
-@DynamoDBTable(tableName = "power")
+@DynamoDBTable(tableName = "ttdPowerSupply")
 public class TTDPowerSupply implements Serializable {
     private static final long serialVersionUID = -3534650012619938612L;
 
     private String id;
     private String deviceId;
     private String deviceName;
-    private String timestamp;
+    private String tStamp;
     private String ipAddress;
     private String power;
     private String energy;
 
-    public TTDPowerSupply(String id, String deviceId, String deviceName, String timestamp, String ipAddress, String power, String energy) {
+    public TTDPowerSupply(String id, String deviceId, String deviceName, String tStamp, String ipAddress, String power, String energy) {
         this.id = id;
         this.deviceId = deviceId;
         this.deviceName = deviceName;
-        this.timestamp = timestamp;
+        this.tStamp = tStamp;
         this.ipAddress = ipAddress;
         this.power = power;
         this.energy = energy;
@@ -63,13 +63,13 @@ public class TTDPowerSupply implements Serializable {
         this.deviceName = deviceName;
     }
 
-    @DynamoDBAttribute(attributeName = "timestamp")
-    public String getTimestamp() {
-        return timestamp;
+    @DynamoDBAttribute(attributeName = "tStamp")
+    public String gettStamp() {
+        return tStamp;
     }
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
+    public void settStamp(String tStamp) {
+        this.tStamp = tStamp;
     }
 
     @DynamoDBAttribute(attributeName = "power")
@@ -105,7 +105,7 @@ public class TTDPowerSupply implements Serializable {
                 "id:'" + id + '\'' +
                 ", deviceId:'" + deviceId + '\'' +
                 ", deviceName:'" + deviceName + '\'' +
-                ", timestamp:'" + timestamp + '\'' +
+                ", tStamp:'" + tStamp + '\'' +
                 ", ipAddress:'" + ipAddress + '\'' +
                 ", power:'" + power + '\'' +
                 ", energy:'" + energy + '\'' +

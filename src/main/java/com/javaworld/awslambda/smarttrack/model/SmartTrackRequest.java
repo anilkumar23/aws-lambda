@@ -9,24 +9,13 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 @DynamoDBTable(tableName = "smart_track_request")
 public class SmartTrackRequest {
 
-    private String deviceId;
     private String timestamp;
 
     public SmartTrackRequest() {
     }
 
-    public SmartTrackRequest(String deviceId, String timestamp) {
-        this.deviceId = deviceId;
+    public SmartTrackRequest(String timestamp) {
         this.timestamp = timestamp;
-    }
-
-    @DynamoDBAttribute(attributeName = "deviceId")
-    public String getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
     }
 
     @DynamoDBAttribute(attributeName = "timestamp")

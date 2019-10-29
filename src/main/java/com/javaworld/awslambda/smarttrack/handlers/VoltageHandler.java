@@ -15,10 +15,8 @@ import com.javaworld.awslambda.smarttrack.model.SmartTrackRequest;
 import com.javaworld.awslambda.smarttrack.model.TTDPowerSupply;
 import com.javaworld.awslambda.smarttrack.model.Voltage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
 
 /**
  * Created by anil.saladi on 10/23/2019.
@@ -47,40 +45,61 @@ public class VoltageHandler implements RequestHandler<SmartTrackRequest, List<Vo
 
     private List<Voltage> getVoltageList(DynamoDBMapper mapper, SmartTrackRequest smartTrackRequest) throws Exception {
         Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
-        eav.put(":val1", new AttributeValue().withS(smartTrackRequest.getDeviceId()));
-
+        eav.put(":tStamp", new AttributeValue().withS(smartTrackRequest.getTimestamp()));
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
-                .withFilterExpression("deviceId = :val1").withExpressionAttributeValues(eav);
+                .withFilterExpression("contains(tStamp, :tStamp)").withExpressionAttributeValues(eav);
         List<TTDPowerSupply> ttdPowerSupplyList = mapper.scan(TTDPowerSupply.class, scanExpression);
         List<TTDPowerSupply> getTtdPowerSupplyList = new ArrayList<>();
         List<Voltage> voltageList = new ArrayList<>();
-        int count = 10;
+        int count = 24;
+        int c = 0;
+        Map<String, String> map = new HashMap<>();
+        String rphvol = "";
         for (TTDPowerSupply ttdPowerSupply : ttdPowerSupplyList) {
-            if (count!=0) {
+            if (count != 0) {
                 Gson gson = new Gson();
                 ttdPowerSupply.setPower(ttdPowerSupply.getPower().replaceAll("'", ""));
                 ttdPowerSupply.setEnergy(ttdPowerSupply.getEnergy().replaceAll("'", ""));
                 JsonParser jsonParser = new JsonParser();
-
                 JsonObject objectFromString = jsonParser.parse(ttdPowerSupply.toString()).getAsJsonObject();
-
                 ttdPowerSupply = gson.fromJson(objectFromString, TTDPowerSupply.class);
-                if (ttdPowerSupply.getTimestamp().contains(smartTrackRequest.getTimestamp())) {
+
+                if (ttdPowerSupply.gettStamp().contains(smartTrackRequest.getTimestamp())) {
                     getTtdPowerSupplyList.add(ttdPowerSupply);
-                    String rphvol = null;
+
                     if (ttdPowerSupply.getPower() != null && ttdPowerSupply.getPower().contains("rphvol")) {
                         String[] s = ttdPowerSupply.getPower().split(",");
-                        rphvol = s[1].replaceAll("rphvol:","");
+
+                        if (count == 24) {
+                            map.put(ttdPowerSupply.getDeviceId(), s[1].replaceAll("rphvol:", "").replace("V","").trim());
+                        } else {
+                            if (map.containsKey(ttdPowerSupply.getDeviceId())) {
+                                String s3 =  map.get(ttdPowerSupply.getDeviceId());
+                                map.put(ttdPowerSupply.getDeviceId(), s3.concat(", " + s[1].replaceAll("rphvol:", "").replace("V","").trim()));
+                            } else if (c == 0) {
+                                map.put(ttdPowerSupply.getDeviceId(), s[1].replaceAll("rphvol:", "").replace("V","").trim());
+                                c++;
+                            } else {
+                                String newVol = s[1].replaceAll("rphvol:", "").replace("V","").trim();
+                                map.put(ttdPowerSupply.getDeviceId(), newVol);
+                            }
+                        }
                         count--;
                     }
-                    Voltage voltage = new Voltage(rphvol, ttdPowerSupply.getTimestamp());
-                    voltageList.add(voltage);
                 }
-            }else {
+            } else {
                 break;
             }
         }
-
+        for (Map.Entry<String, String> s1 : map.entrySet()) {
+            String s4[] = s1.getValue().split(",");
+            List<Double> list = new ArrayList<>();
+            for (String d: s4) {
+                list.add(Double.parseDouble(d.trim()));
+            }
+            Voltage voltage = new Voltage(list, s1.getKey());
+            voltageList.add(voltage);
+        }
         return voltageList;
     }
 }
