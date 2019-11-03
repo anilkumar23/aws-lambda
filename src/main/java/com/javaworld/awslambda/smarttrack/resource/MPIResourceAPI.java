@@ -4,12 +4,15 @@ import com.javaworld.awslambda.smarttrack.model.SmartTrackRequest;
 import com.javaworld.awslambda.smarttrack.model.TTDPowerSupply;
 import com.javaworld.awslambda.smarttrack.model.Voltage;
 import com.javaworld.awslambda.smarttrack.serviceImpl.SmartTrackImpl;
+import com.javaworld.awslambda.smarttrack.util.SmartTrackUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -24,9 +27,9 @@ public class MPIResourceAPI {
     SmartTrackImpl smartTrackImpl;
 
     @RequestMapping(value = "/send", method = RequestMethod.POST, headers = "Accept=application/json")
-    public HttpStatus insertData(@RequestBody TTDPowerSupply ttdPowerSupply) {
-        logger.info("Entered insertData method to dump data into DB with the following data..." + ttdPowerSupply.toString());
-        boolean isDataInserted = smartTrackImpl.insertData(ttdPowerSupply);
+    public HttpStatus insertData(@RequestBody List<TTDPowerSupply> ttdPowerSupplyList) {
+       // logger.info("Entered insertData method to dump data into DB with the following data..." + ttdPowerSupply.toString());
+        boolean isDataInserted = smartTrackImpl.insertData(ttdPowerSupplyList);
         return isDataInserted ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
     }
 
@@ -44,11 +47,13 @@ public class MPIResourceAPI {
     }*/
 
 
-    @RequestMapping(value = "/getVoltage/{timestamp}", method = RequestMethod.GET, headers = "Accept=application/json")
-    public List<Voltage> getVoltageData(@PathVariable String timestamp) {
+    @PostMapping(value = "/getVoltage" , consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Voltage> getVoltageData(@RequestBody SmartTrackRequest smartTrackRequest, HttpServletResponse response) {
         logger.info("Entered getData method for retrieving the requested data...");
         try {
-            List<Voltage> voltageList = smartTrackImpl.getVoltageData(timestamp);
+            SmartTrackUtils.setResponseHeader(response);
+            List<Voltage> voltageList = smartTrackImpl.getVoltageData(smartTrackRequest.getTimestamp());
             logger.info("Successfully fetched the requested data...");
             return voltageList;
         } catch (Exception ex) {

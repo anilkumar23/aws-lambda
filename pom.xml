@@ -45,7 +45,17 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.9.5</version>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/com.amazonaws.serverless/aws-serverless-java-container-core -->
+        <dependency>
+            <groupId>com.amazonaws.serverless</groupId>
+            <artifactId>aws-serverless-java-container-core</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws.serverless</groupId>
+            <artifactId>aws-serverless-java-container-spring</artifactId>
+            <version>1.1</version>
+        </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-dynamodb</artifactId>
@@ -83,7 +93,17 @@
         </dependency>
 
     </dependencies>
-
+ <!--   <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>Finchley.SR1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>-->
     <build>
         <plugins>
             <plugin>

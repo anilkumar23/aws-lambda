@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javaworld.awslambda.smarttrack.exception.TTDCustomException;
+import com.javaworld.awslambda.smarttrack.model.SmartTrackRequest;
 import com.javaworld.awslambda.smarttrack.model.TTDPowerSupply;
 import com.javaworld.awslambda.smarttrack.model.Voltage;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +31,7 @@ import java.util.*;
 public class SmartTrackImpl {
     private static final Logger logger = LogManager.getLogger(SmartTrackImpl.class.getName());
 
-    public boolean insertData(TTDPowerSupply power) {
+    public boolean insertData(List<TTDPowerSupply> power) {
         Regions REGION = Regions.US_EAST_1;
         AmazonDynamoDB dynamoDBClient = new AmazonDynamoDBClient();
         dynamoDBClient.setRegion(Region.getRegion(REGION));
@@ -44,17 +45,19 @@ public class SmartTrackImpl {
             logger.error("DBConnection failed due to " + ex.getMessage());
         }
         boolean isDataInserted = false;
-        if (power != null) {
-            try {
-                mapper.save(power);
-                logger.info("Successfully inserted the data into DB...");
-                isDataInserted = true;
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                logger.error("Error occur while inserting data..." + ex.getMessage());
+        for (TTDPowerSupply ttdPowerSupply : power) {
+            if (ttdPowerSupply != null) {
+                try {
+                    mapper.save(ttdPowerSupply);
+                    logger.info("Successfully inserted the data into DB...");
+                    isDataInserted = true;
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    logger.error("Error occur while inserting data..." + ex.getMessage());
+                }
+            } else {
+                logger.info("Request Body has some null values...");
             }
-        } else {
-            logger.info("Request Body has some null values...");
         }
         return isDataInserted;
     }
@@ -82,7 +85,6 @@ public class SmartTrackImpl {
         DynamoDBMapper mapper = new DynamoDBMapper(client);
 
         List<Voltage> voltageList = new ArrayList<>();
-        // SmartTrackRequest smartTrackRequest = new SmartTrackRequest(deviceId,timeStamp);
         try {
             voltageList = getVoltageList(mapper, tStamp);
             if (voltageList != null) {
@@ -107,9 +109,9 @@ public class SmartTrackImpl {
         return powerSupplyArrayList;
     }
 
-    /*private List<TTDPowerSupply> getDataOfSpecificDeviceId(DynamoDBMapper mapper, SmartTrackRequest smartTrackRequest) throws Exception {
+    private List<TTDPowerSupply> getDataOfSpecificDeviceId(DynamoDBMapper mapper, String deviceId) throws Exception {
         Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
-        eav.put(":val1", new AttributeValue().withS(smartTrackRequest.getDeviceId()));
+        eav.put(":val1", new AttributeValue().withS(deviceId));
 
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
                 .withFilterExpression("deviceId = :val1").withExpressionAttributeValues(eav);
@@ -124,12 +126,10 @@ public class SmartTrackImpl {
             JsonObject objectFromString = jsonParser.parse(ttdPowerSupply.toString()).getAsJsonObject();
 
             ttdPowerSupply = gson.fromJson(objectFromString, TTDPowerSupply.class);
-            if (ttdPowerSupply.gettStamp().contains(smartTrackRequest.getTimestamp())) {
-                getTtdPowerSupplyList.add(ttdPowerSupply);
-            }
+            getTtdPowerSupplyList.add(ttdPowerSupply);
         }
         return getTtdPowerSupplyList;
-    }*/
+    }
 
     private List<Voltage> getVoltageList(DynamoDBMapper mapper, String timestamp) throws Exception {
         Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
@@ -142,7 +142,6 @@ public class SmartTrackImpl {
         int count = 24;
         int c = 0;
         Map<String, String> map = new HashMap<>();
-        String rphvol = "";
         for (TTDPowerSupply ttdPowerSupply : ttdPowerSupplyList) {
             if (count != 0) {
                 Gson gson = new Gson();
@@ -157,18 +156,18 @@ public class SmartTrackImpl {
 
                     if (ttdPowerSupply.getPower() != null && ttdPowerSupply.getPower().contains("rphvol")) {
                         String[] s = ttdPowerSupply.getPower().split(",");
-
+                        String rPhVol = s[1].replaceAll("rphvol:", "").replace("V", "").trim();
                         if (count == 24) {
-                            map.put(ttdPowerSupply.getDeviceId(), s[1].replaceAll("rphvol:", "").replace("V","").trim());
+                            map.put(ttdPowerSupply.getDeviceId(), rPhVol);
                         } else {
                             if (map.containsKey(ttdPowerSupply.getDeviceId())) {
-                                String s3 =  map.get(ttdPowerSupply.getDeviceId());
-                                map.put(ttdPowerSupply.getDeviceId(), s3.concat(", " + s[1].replaceAll("rphvol:", "").replace("V","").trim()));
+                                String s3 = map.get(ttdPowerSupply.getDeviceId());
+                                map.put(ttdPowerSupply.getDeviceId(), s3.concat(", " + rPhVol));
                             } else if (c == 0) {
-                                map.put(ttdPowerSupply.getDeviceId(), s[1].replaceAll("rphvol:", "").replace("V","").trim());
+                                map.put(ttdPowerSupply.getDeviceId(), rPhVol);
                                 c++;
                             } else {
-                                String newVol = s[1].replaceAll("rphvol:", "").replace("V","").trim();
+                                String newVol = rPhVol;
                                 map.put(ttdPowerSupply.getDeviceId(), newVol);
                             }
                         }
@@ -182,7 +181,7 @@ public class SmartTrackImpl {
         for (Map.Entry<String, String> s1 : map.entrySet()) {
             String s4[] = s1.getValue().split(",");
             List<Double> list = new ArrayList<>();
-            for (String d: s4) {
+            for (String d : s4) {
                 list.add(Double.parseDouble(d.trim()));
             }
             Voltage voltage = new Voltage(list, s1.getKey());

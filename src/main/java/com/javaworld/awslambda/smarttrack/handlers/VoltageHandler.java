@@ -97,8 +97,8 @@ public class VoltageHandler implements RequestHandler<SmartTrackRequest, List<Vo
             for (String d: s4) {
                 list.add(Double.parseDouble(d.trim()));
             }
-            Voltage voltage = new Voltage(list, s1.getKey());
-            voltageList.add(voltage);
+            /*Voltage voltage = new Voltage(list, s1.getKey());
+            voltageList.add(voltage);*/
         }
         return voltageList;
     }
