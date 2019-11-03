@@ -17,8 +17,6 @@ import com.javaworld.awslambda.smarttrack.exception.TTDCustomException;
 import com.javaworld.awslambda.smarttrack.model.SmartTrackRequest;
 import com.javaworld.awslambda.smarttrack.model.TTDPowerSupply;
 import com.javaworld.awslambda.smarttrack.model.Voltage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -29,7 +27,7 @@ import java.util.*;
 @SuppressWarnings("deprecation")
 @Service
 public class SmartTrackImpl {
-    private static final Logger logger = LogManager.getLogger(SmartTrackImpl.class.getName());
+   // private static final Logger logger = LogManager.getLogger(SmartTrackImpl.class.getName());
 
     public boolean insertData(List<TTDPowerSupply> power) {
         Regions REGION = Regions.US_EAST_1;
@@ -39,24 +37,24 @@ public class SmartTrackImpl {
         try {
             DynamoDBTableMapper<TTDPowerSupply, String, ?> table = mapper.newTableMapper(TTDPowerSupply.class);
             table.createTableIfNotExists(new ProvisionedThroughput(25L, 25L));
-            logger.info("Connection to the DB started...");
-            logger.info("Connection successfully established...");
+//            logger.info("Connection to the DB started...");
+//            logger.info("Connection successfully established...");
         } catch (Exception ex) {
-            logger.error("DBConnection failed due to " + ex.getMessage());
+//            logger.error("DBConnection failed due to " + ex.getMessage());
         }
         boolean isDataInserted = false;
         for (TTDPowerSupply ttdPowerSupply : power) {
             if (ttdPowerSupply != null) {
                 try {
                     mapper.save(ttdPowerSupply);
-                    logger.info("Successfully inserted the data into DB...");
+//                    logger.info("Successfully inserted the data into DB...");
                     isDataInserted = true;
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    logger.error("Error occur while inserting data..." + ex.getMessage());
+//                    logger.error("Error occur while inserting data..." + ex.getMessage());
                 }
             } else {
-                logger.info("Request Body has some null values...");
+//                logger.info("Request Body has some null values...");
             }
         }
         return isDataInserted;

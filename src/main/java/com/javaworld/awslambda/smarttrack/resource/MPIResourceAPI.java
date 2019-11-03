@@ -5,8 +5,6 @@ import com.javaworld.awslambda.smarttrack.model.TTDPowerSupply;
 import com.javaworld.awslambda.smarttrack.model.Voltage;
 import com.javaworld.awslambda.smarttrack.serviceImpl.SmartTrackImpl;
 import com.javaworld.awslambda.smarttrack.util.SmartTrackUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/message")
 public class MPIResourceAPI {
-    private final Logger logger = LogManager.getLogger(MPIResourceAPI.class.getName());
+   // private final Logger logger = LogManager.getLogger(MPIResourceAPI.class.getName());
 
     @Autowired
     SmartTrackImpl smartTrackImpl;
@@ -50,14 +48,14 @@ public class MPIResourceAPI {
     @PostMapping(value = "/getVoltage" , consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Voltage> getVoltageData(@RequestBody SmartTrackRequest smartTrackRequest, HttpServletResponse response) {
-        logger.info("Entered getData method for retrieving the requested data...");
+      //  logger.info("Entered getData method for retrieving the requested data...");
         try {
             SmartTrackUtils.setResponseHeader(response);
             List<Voltage> voltageList = smartTrackImpl.getVoltageData(smartTrackRequest.getTimestamp());
-            logger.info("Successfully fetched the requested data...");
+            //logger.info("Successfully fetched the requested data...");
             return voltageList;
         } catch (Exception ex) {
-            logger.error("Error occur while fetching TTDPowerSupply details..." + ex);
+          //  logger.error("Error occur while fetching TTDPowerSupply details..." + ex);
             return null;
         }
     }
@@ -67,10 +65,10 @@ public class MPIResourceAPI {
     public List<TTDPowerSupply> getDeviceDataBasedOnName(@PathVariable String deviceName) {
         try {
             List<TTDPowerSupply> ttdPowerSupplyList = smartTrackImpl.getDeviceDataWithName(deviceName);
-            logger.info("Successfully fetched the requested data...");
+           // logger.info("Successfully fetched the requested data...");
             return ttdPowerSupplyList;
         } catch (Exception ex) {
-            logger.error("Error occur while fetching TTDPowerSupply details..." + ex);
+          //  logger.error("Error occur while fetching TTDPowerSupply details..." + ex);
             return null;
         }
     }

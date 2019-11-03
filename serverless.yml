@@ -1,0 +1,17 @@
+service: aws-lambda
+
+provider:
+  name: aws
+  runtime: java8
+
+package:
+  artifact: build/distributions/aws-lambda-java.zip
+
+functions:
+  smartrakLambda:
+    handler: com.javaworld.awslambda.smarttrack.StreamLambdaHandler::handleRequest
+    events:
+      - http:
+          path: /method/getVoltage
+          method: POST
+    timeout: 30
