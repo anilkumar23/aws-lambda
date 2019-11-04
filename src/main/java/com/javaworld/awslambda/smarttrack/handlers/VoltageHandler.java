@@ -23,14 +23,14 @@ import java.util.*;
  */
 public class VoltageHandler implements RequestHandler<SmartTrackRequest, List<Voltage>> {
 
-
     @Override
     public List<Voltage> handleRequest(SmartTrackRequest smartTrackRequest, Context context) {
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
         DynamoDBMapper mapper = new DynamoDBMapper(client);
 
         List<Voltage> voltageList = new ArrayList<>();
-        //SmartTrackRequest smartTrackRequest = new SmartTrackRequest(deviceId,timeStamp);
+        // SmartTrackRequest smartTrackRequest = new
+        // SmartTrackRequest(deviceId,timeStamp);
         try {
             voltageList = getVoltageList(mapper, smartTrackRequest);
             if (voltageList != null) {
@@ -71,16 +71,19 @@ public class VoltageHandler implements RequestHandler<SmartTrackRequest, List<Vo
                         String[] s = ttdPowerSupply.getPower().split(",");
 
                         if (count == 24) {
-                            map.put(ttdPowerSupply.getDeviceId(), s[1].replaceAll("rphvol:", "").replace("V","").trim());
+                            map.put(ttdPowerSupply.getDeviceId(),
+                                    s[1].replaceAll("rphvol:", "").replace("V", "").trim());
                         } else {
                             if (map.containsKey(ttdPowerSupply.getDeviceId())) {
-                                String s3 =  map.get(ttdPowerSupply.getDeviceId());
-                                map.put(ttdPowerSupply.getDeviceId(), s3.concat(", " + s[1].replaceAll("rphvol:", "").replace("V","").trim()));
+                                String s3 = map.get(ttdPowerSupply.getDeviceId());
+                                map.put(ttdPowerSupply.getDeviceId(),
+                                        s3.concat(", " + s[1].replaceAll("rphvol:", "").replace("V", "").trim()));
                             } else if (c == 0) {
-                                map.put(ttdPowerSupply.getDeviceId(), s[1].replaceAll("rphvol:", "").replace("V","").trim());
+                                map.put(ttdPowerSupply.getDeviceId(),
+                                        s[1].replaceAll("rphvol:", "").replace("V", "").trim());
                                 c++;
                             } else {
-                                String newVol = s[1].replaceAll("rphvol:", "").replace("V","").trim();
+                                String newVol = s[1].replaceAll("rphvol:", "").replace("V", "").trim();
                                 map.put(ttdPowerSupply.getDeviceId(), newVol);
                             }
                         }
@@ -94,11 +97,12 @@ public class VoltageHandler implements RequestHandler<SmartTrackRequest, List<Vo
         for (Map.Entry<String, String> s1 : map.entrySet()) {
             String s4[] = s1.getValue().split(",");
             List<Double> list = new ArrayList<>();
-            for (String d: s4) {
+            for (String d : s4) {
                 list.add(Double.parseDouble(d.trim()));
             }
-            /*Voltage voltage = new Voltage(list, s1.getKey());
-            voltageList.add(voltage);*/
+            /*
+             * Voltage voltage = new Voltage(list, s1.getKey()); voltageList.add(voltage);
+             */
         }
         return voltageList;
     }

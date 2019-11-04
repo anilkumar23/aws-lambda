@@ -45,7 +45,7 @@ public class MPIResourceAPI {
     }*/
 
 
-    @PostMapping(value = "/getVoltage" , consumes = MediaType.APPLICATION_JSON_VALUE,
+    @RequestMapping(value = "/getVoltage" , consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Voltage> getVoltageData(@RequestBody SmartTrackRequest smartTrackRequest, HttpServletResponse response) {
       //  logger.info("Entered getData method for retrieving the requested data...");

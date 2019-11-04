@@ -1,5 +1,8 @@
 package com.javaworld.awslambda.smarttrack.serviceImpl;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -8,18 +11,21 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTableMapper;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.javaworld.awslambda.smarttrack.exception.TTDCustomException;
-import com.javaworld.awslambda.smarttrack.model.SmartTrackRequest;
 import com.javaworld.awslambda.smarttrack.model.TTDPowerSupply;
 import com.javaworld.awslambda.smarttrack.model.Voltage;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by anil.saladi on 9/28/2019.
@@ -27,7 +33,8 @@ import java.util.*;
 @SuppressWarnings("deprecation")
 @Service
 public class SmartTrackImpl {
-   // private static final Logger logger = LogManager.getLogger(SmartTrackImpl.class.getName());
+    // private static final Logger logger =
+    // LogManager.getLogger(SmartTrackImpl.class.getName());
 
     public boolean insertData(List<TTDPowerSupply> power) {
         Regions REGION = Regions.US_EAST_1;
@@ -37,49 +44,49 @@ public class SmartTrackImpl {
         try {
             DynamoDBTableMapper<TTDPowerSupply, String, ?> table = mapper.newTableMapper(TTDPowerSupply.class);
             table.createTableIfNotExists(new ProvisionedThroughput(25L, 25L));
-//            logger.info("Connection to the DB started...");
-//            logger.info("Connection successfully established...");
+            // logger.info("Connection to the DB started...");
+            // logger.info("Connection successfully established...");
         } catch (Exception ex) {
-//            logger.error("DBConnection failed due to " + ex.getMessage());
+            // logger.error("DBConnection failed due to " + ex.getMessage());
         }
         boolean isDataInserted = false;
         for (TTDPowerSupply ttdPowerSupply : power) {
             if (ttdPowerSupply != null) {
                 try {
                     mapper.save(ttdPowerSupply);
-//                    logger.info("Successfully inserted the data into DB...");
+                    // logger.info("Successfully inserted the data into DB...");
                     isDataInserted = true;
                 } catch (Exception ex) {
                     ex.printStackTrace();
-//                    logger.error("Error occur while inserting data..." + ex.getMessage());
+                    // logger.error("Error occur while inserting data..." + ex.getMessage());
                 }
             } else {
-//                logger.info("Request Body has some null values...");
+                // logger.info("Request Body has some null values...");
             }
         }
         return isDataInserted;
     }
 
-   /* public List<TTDPowerSupply> getData(SmartTrackRequest smartTrackRequest) {
-        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
-        DynamoDBMapper mapper = new DynamoDBMapper(client);
-
-        List<TTDPowerSupply> ttdPowerSupplyList = new ArrayList<>();
-        try {
-            ttdPowerSupplyList = getDataOfSpecificDeviceId(mapper, smartTrackRequest);
-            if (ttdPowerSupplyList != null) {
-                return ttdPowerSupplyList;
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            throw new TTDCustomException(e.getMessage());
-        }
-
-    }*/
+    /*
+     * public List<TTDPowerSupply> getData(SmartTrackRequest smartTrackRequest) {
+     * AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
+     * DynamoDBMapper mapper = new DynamoDBMapper(client);
+     * 
+     * List<TTDPowerSupply> ttdPowerSupplyList = new ArrayList<>(); try {
+     * ttdPowerSupplyList = getDataOfSpecificDeviceId(mapper, smartTrackRequest); if
+     * (ttdPowerSupplyList != null) { return ttdPowerSupplyList; } else { return
+     * null; } } catch (Exception e) { throw new TTDCustomException(e.getMessage());
+     * }
+     * 
+     * }
+     */
 
     public List<Voltage> getVoltageData(String tStamp) {
-        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
+        BasicAWSCredentials awsCreds = new BasicAWSCredentials("AKIAT5KM23BCINH7HGMG",
+                "vfLxnFAsM36ZQwweCbeoEMYj0G6s3YhGBRG2E6IT");
+        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_EAST_1)
+                .withCredentials(new AWSStaticCredentialsProvider(awsCreds)).build();
+        // AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
         DynamoDBMapper mapper = new DynamoDBMapper(client);
 
         List<Voltage> voltageList = new ArrayList<>();
@@ -101,8 +108,8 @@ public class SmartTrackImpl {
         DynamoDBMapper mapper = new DynamoDBMapper(client);
         Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
         eav.put(":val1", new AttributeValue().withS(deviceName));
-        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
-                .withFilterExpression("deviceName = :val1").withExpressionAttributeValues(eav);
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression().withFilterExpression("deviceName = :val1")
+                .withExpressionAttributeValues(eav);
         List<TTDPowerSupply> powerSupplyArrayList = mapper.scan(TTDPowerSupply.class, scanExpression);
         return powerSupplyArrayList;
     }
@@ -111,8 +118,8 @@ public class SmartTrackImpl {
         Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
         eav.put(":val1", new AttributeValue().withS(deviceId));
 
-        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
-                .withFilterExpression("deviceId = :val1").withExpressionAttributeValues(eav);
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression().withFilterExpression("deviceId = :val1")
+                .withExpressionAttributeValues(eav);
         List<TTDPowerSupply> ttdPowerSupplyList = mapper.scan(TTDPowerSupply.class, scanExpression);
         List<TTDPowerSupply> getTtdPowerSupplyList = new ArrayList<>();
         for (TTDPowerSupply ttdPowerSupply : ttdPowerSupplyList) {
@@ -190,9 +197,9 @@ public class SmartTrackImpl {
 
 }
 
-//Inserting data with table ------------
+// Inserting data with table ------------
 /*
-* DynamoDBTableMapper<SmartTrack,String,?> table = mapper.newTableMapper(SmartTrack.class);
-table.createTableIfNotExists(new ProvisionedThroughput(25L, 25L));
-table.saveIfNotExists(smartTrack);
-* */
+ * DynamoDBTableMapper<SmartTrack,String,?> table =
+ * mapper.newTableMapper(SmartTrack.class); table.createTableIfNotExists(new
+ * ProvisionedThroughput(25L, 25L)); table.saveIfNotExists(smartTrack);
+ */
