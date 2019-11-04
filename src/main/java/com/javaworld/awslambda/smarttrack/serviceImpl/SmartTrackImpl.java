@@ -82,8 +82,8 @@ public class SmartTrackImpl {
      */
 
     public List<Voltage> getVoltageData(String tStamp) {
-        BasicAWSCredentials awsCreds = new BasicAWSCredentials("AKIAT5KM23BCINH7HGMG",
-                "vfLxnFAsM36ZQwweCbeoEMYj0G6s3YhGBRG2E6IT");
+        BasicAWSCredentials awsCreds = new BasicAWSCredentials("Provide_ur_access_key",
+                "Provide_ur_secret_key");
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_EAST_1)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds)).build();
         // AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
