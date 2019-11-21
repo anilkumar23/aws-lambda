@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Created by anil.saladi on 9/28/2019.
@@ -71,19 +73,19 @@ public class SmartTrackImpl {
      * public List<TTDPowerSupply> getData(SmartTrackRequest smartTrackRequest) {
      * AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
      * DynamoDBMapper mapper = new DynamoDBMapper(client);
-     * 
+     *
      * List<TTDPowerSupply> ttdPowerSupplyList = new ArrayList<>(); try {
      * ttdPowerSupplyList = getDataOfSpecificDeviceId(mapper, smartTrackRequest); if
      * (ttdPowerSupplyList != null) { return ttdPowerSupplyList; } else { return
      * null; } } catch (Exception e) { throw new TTDCustomException(e.getMessage());
      * }
-     * 
+     *
      * }
      */
 
     public List<Voltage> getVoltageData(String tStamp) {
-        BasicAWSCredentials awsCreds = new BasicAWSCredentials("Provide_ur_access_key",
-                "Provide_ur_secret_key");
+        BasicAWSCredentials awsCreds = new BasicAWSCredentials("AKIAT5KM23BCAHRAVSMS",
+                "TKbBWW3sPw1hgvxtHLzH5tTLWeszwsHw7xvMPtWC");
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_EAST_1)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds)).build();
         // AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
@@ -141,55 +143,56 @@ public class SmartTrackImpl {
         eav.put(":tStamp", new AttributeValue().withS(timestamp));
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
                 .withFilterExpression("contains(tStamp, :tStamp)").withExpressionAttributeValues(eav);
-        List<TTDPowerSupply> ttdPowerSupplyList = mapper.scan(TTDPowerSupply.class, scanExpression);
+        Set<TTDPowerSupply> ttdPowerSupplyList = (Set<TTDPowerSupply>) mapper.scan(TTDPowerSupply.class, scanExpression);
         List<TTDPowerSupply> getTtdPowerSupplyList = new ArrayList<>();
         List<Voltage> voltageList = new ArrayList<>();
-        int count = 24;
+        int count = 1;
         int c = 0;
         Map<String, String> map = new HashMap<>();
         for (TTDPowerSupply ttdPowerSupply : ttdPowerSupplyList) {
-            if (count != 0) {
-                Gson gson = new Gson();
-                ttdPowerSupply.setPower(ttdPowerSupply.getPower().replaceAll("'", ""));
-                ttdPowerSupply.setEnergy(ttdPowerSupply.getEnergy().replaceAll("'", ""));
-                JsonParser jsonParser = new JsonParser();
-                JsonObject objectFromString = jsonParser.parse(ttdPowerSupply.toString()).getAsJsonObject();
-                ttdPowerSupply = gson.fromJson(objectFromString, TTDPowerSupply.class);
+            Gson gson = new Gson();
+            ttdPowerSupply.setPower(ttdPowerSupply.getPower().replaceAll("'", ""));
+            ttdPowerSupply.setEnergy(ttdPowerSupply.getEnergy().replaceAll("'", ""));
+            JsonParser jsonParser = new JsonParser();
+            JsonObject objectFromString = jsonParser.parse(ttdPowerSupply.toString()).getAsJsonObject();
+            ttdPowerSupply = gson.fromJson(objectFromString, TTDPowerSupply.class);
 
-                if (ttdPowerSupply.gettStamp().contains(timestamp)) {
-                    getTtdPowerSupplyList.add(ttdPowerSupply);
+            if (ttdPowerSupply.gettStamp().contains(timestamp)) {
+                getTtdPowerSupplyList.add(ttdPowerSupply);
 
-                    if (ttdPowerSupply.getPower() != null && ttdPowerSupply.getPower().contains("rphvol")) {
-                        String[] s = ttdPowerSupply.getPower().split(",");
-                        String rPhVol = s[1].replaceAll("rphvol:", "").replace("V", "").trim();
-                        if (count == 24) {
+                if (ttdPowerSupply.getPower() != null && ttdPowerSupply.getPower().contains("rphvol")) {
+                    String[] s = ttdPowerSupply.getPower().split(",");
+                    String rPhVol = s[1].replaceAll("rphvol:", "").replace("V", "").trim();
+                    if (count == 1) {
+                        map.put(ttdPowerSupply.getDeviceId(), rPhVol);
+                        count = 0;
+                    } else {
+                        if (map.containsKey(ttdPowerSupply.getDeviceId())) {
+                            String s3 = map.get(ttdPowerSupply.getDeviceId());
+                            map.put(ttdPowerSupply.getDeviceId(), s3.concat(", " + rPhVol));
+                        } else if (c == 0) {
                             map.put(ttdPowerSupply.getDeviceId(), rPhVol);
+                            c++;
                         } else {
-                            if (map.containsKey(ttdPowerSupply.getDeviceId())) {
-                                String s3 = map.get(ttdPowerSupply.getDeviceId());
-                                map.put(ttdPowerSupply.getDeviceId(), s3.concat(", " + rPhVol));
-                            } else if (c == 0) {
-                                map.put(ttdPowerSupply.getDeviceId(), rPhVol);
-                                c++;
-                            } else {
-                                String newVol = rPhVol;
-                                map.put(ttdPowerSupply.getDeviceId(), newVol);
-                            }
+                            String newVol = rPhVol;
+                            map.put(ttdPowerSupply.getDeviceId(), newVol);
                         }
-                        count--;
                     }
                 }
-            } else {
-                break;
             }
         }
         for (Map.Entry<String, String> s1 : map.entrySet()) {
             String s4[] = s1.getValue().split(",");
-            List<Double> list = new ArrayList<>();
+            Set<Double> set = new HashSet<>();
             for (String d : s4) {
-                list.add(Double.parseDouble(d.trim()));
+                int finalCount = set.size();
+                if (finalCount <= 23) {
+                    set.add(Double.parseDouble(d.trim()));
+                }else {
+                    break;
+                }
             }
-            Voltage voltage = new Voltage(list, s1.getKey());
+            Voltage voltage = new Voltage(set, s1.getKey());
             voltageList.add(voltage);
         }
         return voltageList;
