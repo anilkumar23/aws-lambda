@@ -10,12 +10,14 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 public class SmartTrackRequest {
 
     private String timestamp;
+    private String deviceName;
 
     public SmartTrackRequest() {
     }
 
-    public SmartTrackRequest(String timestamp) {
+    public SmartTrackRequest(String timestamp, String deviceName) {
         this.timestamp = timestamp;
+        this.deviceName = deviceName;
     }
 
     @DynamoDBAttribute(attributeName = "timestamp")
@@ -25,5 +27,14 @@ public class SmartTrackRequest {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
+    }
+
+    @DynamoDBAttribute(attributeName = "deviceName")
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 }

@@ -1,17 +1,21 @@
-service: aws-lambda
+service: ttd-deviceList
 
 provider:
   name: aws
   runtime: java8
 
 package:
-  artifact: build/distributions/aws-lambda.zip
+  artifact: build/distributions/ttd-deviceList.zip
 
 functions:
   smartrakLambda:
     handler: com.javaworld.awslambda.smarttrack.StreamLambdaHandler::handleRequest
     events:
       - http:
-          path: /message/getVoltage
-          method: POST
+          path: /message/getDevices
+          method: GET
+          request:
+            parameters:
+              paths:
+                deviceName: true
     timeout: 30
