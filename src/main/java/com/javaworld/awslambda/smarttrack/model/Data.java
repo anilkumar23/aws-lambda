@@ -4,17 +4,14 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 
 import java.util.Set;
 
-/**
- * Created by anil.saladi on 10/23/2019.
- */
-public class Voltage {
+public class Data {
     private Set<Double> data;
     private String label;
 
-    public Voltage() {
+    public Data() {
     }
 
-    public Voltage(Set<Double> data, String label) {
+    public Data(Set<Double> data, String label) {
         this.data = data;
         this.label = label;
     }
