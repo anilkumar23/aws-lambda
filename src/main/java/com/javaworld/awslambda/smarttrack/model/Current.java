@@ -2,20 +2,16 @@ package com.javaworld.awslambda.smarttrack.model;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 
-import java.util.List;
 import java.util.Set;
 
-/**
- * Created by anil.saladi on 10/23/2019.
- */
-public class Voltage {
+public class Current {
     private Set<Double> data;
     private String label;
 
-    public Voltage() {
+    public Current() {
     }
 
-    public Voltage(Set<Double> data, String label) {
+    public Current(Set<Double> data, String label) {
         this.data = data;
         this.label = label;
     }

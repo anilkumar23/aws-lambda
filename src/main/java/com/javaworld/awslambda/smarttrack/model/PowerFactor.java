@@ -5,26 +5,23 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Created by anil.saladi on 10/23/2019.
- */
-public class Voltage {
-    private Set<Double> data;
+public class PowerFactor {
+    private List<Double> data;
     private String label;
 
-    public Voltage() {
+    public PowerFactor() {
     }
 
-    public Voltage(Set<Double> data, String label) {
+    public PowerFactor(List<Double> data, String label) {
         this.data = data;
         this.label = label;
     }
     @DynamoDBAttribute(attributeName = "data")
-    public Set<Double> getData() {
+    public List<Double> getData() {
         return data;
     }
 
-    public void setData(Set<Double> data) {
+    public void setData(List<Double> data) {
         this.data = data;
     }
     @DynamoDBAttribute(attributeName = "label")
