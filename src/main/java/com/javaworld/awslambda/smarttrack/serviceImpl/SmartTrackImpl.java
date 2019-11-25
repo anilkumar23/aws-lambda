@@ -77,8 +77,8 @@ public class SmartTrackImpl {
      */
 
     public DeviceVariables getVoltageData(SmartTrackRequest smartTrackRequest) {
-        BasicAWSCredentials awsCreds = new BasicAWSCredentials("AKIAT5KM23BCHXUNAR6C",
-                "Vj6J6t6qbnjPq9WBwVxso44cVjH88dbai6xBJqPP");
+        BasicAWSCredentials awsCreds = new BasicAWSCredentials("",
+                "");
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_EAST_1)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds)).build();
         // AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
@@ -220,8 +220,8 @@ public class SmartTrackImpl {
 
     public DeviceName getDeviceNames(String deviceName) {
         deviceName=deviceName.toLowerCase();
-        BasicAWSCredentials awsCreds = new BasicAWSCredentials("AKIAT5KM23BCHXUNAR6C",
-                "Vj6J6t6qbnjPq9WBwVxso44cVjH88dbai6xBJqPP");
+        BasicAWSCredentials awsCreds = new BasicAWSCredentials("",
+                "");
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_EAST_1)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds)).build();
         DynamoDBMapper mapper = new DynamoDBMapper(client);
