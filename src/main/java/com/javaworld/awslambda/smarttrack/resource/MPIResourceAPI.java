@@ -26,7 +26,7 @@ public class MPIResourceAPI {
     SmartTrackImpl smartTrackImpl;
 
     @RequestMapping(value = "/send", method = RequestMethod.POST, headers = "Accept=application/json")
-    public HttpStatus insertData(@RequestBody List<DeviceMapping> ttdPowerSupplyList) {
+    public HttpStatus insertData(@RequestBody List<TTDPowerSupplyTemp> ttdPowerSupplyList) {
         // logger.info("Entered insertData method to dump data into DB with the following data..." + ttdPowerSupply.toString());
         boolean isDataInserted = smartTrackImpl.insertData(ttdPowerSupplyList);
         return isDataInserted ? HttpStatus.OK : HttpStatus.BAD_REQUEST;

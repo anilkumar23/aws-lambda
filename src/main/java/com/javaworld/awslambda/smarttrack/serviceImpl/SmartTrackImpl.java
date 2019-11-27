@@ -20,7 +20,12 @@ import com.javaworld.awslambda.smarttrack.exception.TTDCustomException;
 import com.javaworld.awslambda.smarttrack.model.*;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by anil.saladi on 9/28/2019.
@@ -31,21 +36,22 @@ public class SmartTrackImpl {
     // private static final Logger logger =
     // LogManager.getLogger(SmartTrackImpl.class.getName());
 
-    public boolean insertData(List<DeviceMapping> power) {
+    public boolean insertData(List<TTDPowerSupplyTemp> power) {
         Regions REGION = Regions.US_EAST_1;
         AmazonDynamoDB dynamoDBClient = new AmazonDynamoDBClient();
         dynamoDBClient.setRegion(Region.getRegion(REGION));
         DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
         try {
-            DynamoDBTableMapper<DeviceMapping, String, ?> table = mapper.newTableMapper(DeviceMapping.class);
+            DynamoDBTableMapper<TTDPowerSupplyTemp, String, ?> table = mapper.newTableMapper(TTDPowerSupplyTemp.class);
             table.createTableIfNotExists(new ProvisionedThroughput(25L, 25L));
             // logger.info("Connection to the DB started...");
             // logger.info("Connection successfully established...");
         } catch (Exception ex) {
             // logger.error("DBConnection failed due to " + ex.getMessage());
+            System.out.println("dlfjnvkds");
         }
         boolean isDataInserted = false;
-        for (DeviceMapping ttdPowerSupply : power) {
+        for (TTDPowerSupplyTemp ttdPowerSupply : power) {
             if (ttdPowerSupply != null) {
                 try {
                     mapper.save(ttdPowerSupply);
@@ -81,9 +87,8 @@ public class SmartTrackImpl {
                 "");
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_EAST_1)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds)).build();
-        // AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
+
         DynamoDBMapper mapper = new DynamoDBMapper(client);
-       // List<Voltage> voltageList = new ArrayList<>();
         DeviceVariables deviceVariables = new DeviceVariables();
         try {
             deviceVariables = getVoltageList(mapper, smartTrackRequest.getTimestamp(), smartTrackRequest.getDeviceName());
@@ -95,7 +100,6 @@ public class SmartTrackImpl {
         } catch (Exception e) {
             throw new TTDCustomException(e.getMessage());
         }
-
     }
 
     public List<TTDPowerSupply> getDeviceDataWithName(String deviceName) {
@@ -105,7 +109,9 @@ public class SmartTrackImpl {
         eav.put(":val1", new AttributeValue().withS(deviceName));
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression().withFilterExpression("deviceName = :val1")
                 .withExpressionAttributeValues(eav);
+
         List<TTDPowerSupply> powerSupplyArrayList = mapper.scan(TTDPowerSupply.class, scanExpression);
+
         return powerSupplyArrayList;
     }
 
@@ -132,28 +138,29 @@ public class SmartTrackImpl {
     }
 
     private DeviceVariables getVoltageList(DynamoDBMapper mapper, String timestamp, String deviceName) throws Exception {
+
         System.out.println("Entered getVoltageList method to fetch the voltage of devices =============");
+
         Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
-        List<TTDPowerSupply> getTtdPowerSupplyList = new ArrayList<>();
+        List<TTDPowerSupplyTemp> getTtdPowerSupplyList = new ArrayList<>();
         List<Voltage> voltageList = new ArrayList<>();
         DeviceVariables deviceVariables = new DeviceVariables();
         Map<String, String[]> map = new HashMap<>();
         int count = 1;
         int c = 0;
-        eav.put(":val1", new AttributeValue().withS(deviceName));
 
-        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression().withFilterExpression("deviceName = :val1")
-                .withExpressionAttributeValues(eav);
-        List<TTDPowerSupply> ttdPowerSupplyList = mapper.scan(TTDPowerSupply.class, scanExpression);
-
-        for (TTDPowerSupply ttdPowerSupply : ttdPowerSupplyList) {
-            if (ttdPowerSupply.gettStamp().contains(timestamp)) {
+        eav.put(":tStamp", new AttributeValue().withS(timestamp));
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
+                .withFilterExpression("contains(tStamp, :tStamp)").withExpressionAttributeValues(eav);
+        List<TTDPowerSupplyTemp> ttdPowerSupplyList = mapper.scan(TTDPowerSupplyTemp.class, scanExpression);
+        for (TTDPowerSupplyTemp ttdPowerSupply : ttdPowerSupplyList) {
+            if (ttdPowerSupply.getDeviceName().contains(deviceName)) {
             Gson gson = new Gson();
             ttdPowerSupply.setPower(ttdPowerSupply.getPower().replaceAll("'", ""));
             ttdPowerSupply.setEnergy(ttdPowerSupply.getEnergy().replaceAll("'", ""));
             JsonParser jsonParser = new JsonParser();
             JsonObject objectFromString = jsonParser.parse(ttdPowerSupply.toString()).getAsJsonObject();
-            ttdPowerSupply = gson.fromJson(objectFromString, TTDPowerSupply.class);
+            ttdPowerSupply = gson.fromJson(objectFromString, TTDPowerSupplyTemp.class);
                 getTtdPowerSupplyList.add(ttdPowerSupply);
                 if (ttdPowerSupply.getPower() != null && ttdPowerSupply.getPower().contains("rphvol")) {
                     String[] s = ttdPowerSupply.getPower().split(",");
@@ -182,7 +189,7 @@ public class SmartTrackImpl {
         for (Map.Entry<String, String[]> s1 : map.entrySet()) {
             String s4[] = s1.getValue();
             Set<Double> set = new HashSet<>();
-            Set<Double> currSet = new HashSet<>();
+            List<Double> currSet = new ArrayList<>();
             List<Double> pfSet = new ArrayList<>();
             for (int i=0; i<s4.length; i++) {
                 String s5[] = s4[i].split(",");
